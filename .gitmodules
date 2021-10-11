@@ -1,0 +1,3 @@
+[submodule "Game/vendor/stb"]
+	path = Game/vendor/stb
+	url = https://github.com/nothings/stb
