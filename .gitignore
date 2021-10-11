@@ -27,7 +27,7 @@
 *.lai
 *.la
 *.a
-*.lib
+# *.lib don't ignore libs because glfw3.lib is included in the project
 
 # Executables
 *.exe
