@@ -1,7 +1,5 @@
 # Builds
 *x64
-Game/vendor
-Game/assets/textures
 
 # Prerequisites
 *.d
