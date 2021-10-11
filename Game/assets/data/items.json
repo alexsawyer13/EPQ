@@ -1,0 +1,7 @@
+{
+  "dirt": {
+    "Name": "Dirt",
+    "StackSize": 64,
+    "Icon": "blocks/dirt"
+  }
+}
