@@ -110,17 +110,6 @@ long long TimerUs::Time()
 	return std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now() - m_Start).count();
 }
 
-//void CsvAddData(CsvFile &csv, const std::string &colname, int data)
-//{
-//	auto iter = csv.columns.find(colname);
-//	if (iter == csv.columns.end())
-//	{
-//		csv.columns[colname] = { colname };
-//	}
-//
-//	csv.columns[colname].data.push_back(data);
-//}
-
 void CsvAddData(CsvFile &csv, const std::string &colname, int data)
 {
 	if (csv.hashed_columns.find(colname) == csv.hashed_columns.end())
