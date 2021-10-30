@@ -1,6 +1,6 @@
 #include <Core/Input.h>
 #include <Core/Core.h>
-#include <Core/Profiling.h>
+#include <Core/Profiler.h>
 
 #include <spdlog/spdlog.h>
 #include <imgui/imgui.h>

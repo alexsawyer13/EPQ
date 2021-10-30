@@ -160,7 +160,7 @@
     <ClCompile Include="src\Core\Assets.cpp" />
     <ClCompile Include="src\Core\Core.cpp" />
     <ClCompile Include="src\Core\Game.cpp" />
-    <ClCompile Include="src\Core\Profiling.cpp" />
+    <ClCompile Include="src\Core\Profiler.cpp" />
     <ClCompile Include="src\Data\CubeData.cpp" />
     <ClCompile Include="src\Data\Blocks.cpp" />
     <ClCompile Include="src\Game\Player.cpp" />
@@ -197,7 +197,7 @@
     <ClInclude Include="src\Core\Assets.h" />
     <ClInclude Include="src\Core\Core.h" />
     <ClInclude Include="src\Core\Game.h" />
-    <ClInclude Include="src\Core\Profiling.h" />
+    <ClInclude Include="src\Core\Profiler.h" />
     <ClInclude Include="src\Data\CubeData.h" />
     <ClInclude Include="src\Data\Blocks.h" />
     <ClInclude Include="src\Game\Chunk.h" />

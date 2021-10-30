@@ -1,4 +1,4 @@
-#include <Core/Profiling.h>
+#include <Core/Profiler.h>
 #include <Core/Core.h>
 #include <Core/Assets.h>
 
@@ -130,7 +130,7 @@ void CsvFlush(CsvFile &csv)
 {
 	SCOPE_TIMER_US("CsvFlush");
 
-	std::string filepath = s_ProjectDir + "profiling/" + core.profiler.session_string + "/" + GetTimeFormatted() + ".csv";
+	std::string filepath = s_ProjectDir + "profiler/" + core.profiler.session_string + "/" + GetTimeFormatted() + ".csv";
 	
 	std::ofstream file;
 	file.open(filepath);

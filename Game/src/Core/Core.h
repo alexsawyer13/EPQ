@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Core/Profiling.h>
+#include <Core/Profiler.h>
 #include <Graphics/Texture.h>
 #include <Graphics/Shader.h>
 #include <Graphics/TextureArray.h>

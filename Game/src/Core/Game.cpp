@@ -1,7 +1,7 @@
 #include <Core/Game.h>
 #include <Core/Core.h>
 #include <Core/Input.h>
-#include <Core/Profiling.h>
+#include <Core/Profiler.h>
 #include <Core/Assets.h>
 #include <Game/Chunk.h>
 #include <Game/World.h>
@@ -52,7 +52,7 @@ void Run()
 
 		core.profiler.session_string = GetTimeFormatted(); // TODO: MOVE THIS
 		printf("Session string: \"%s\"\n", core.profiler.session_string.c_str());
-		std::filesystem::create_directories(s_ProjectDir + "profiling/" + core.profiler.session_string);
+		std::filesystem::create_directories(s_ProjectDir + "profiler/" + core.profiler.session_string);
 		
 		// Setup spdlog
 		spdlog::info("Running spdlog version {}.{}.{}", SPDLOG_VER_MAJOR, SPDLOG_VER_MINOR, SPDLOG_VER_PATCH);
@@ -388,7 +388,7 @@ void ImGuiRender()
 
 	if (ImGui::Button("Open session directory"))
 	{
-		std::string command = "explorer \"" + s_ProjectDir + "profiling/" + core.profiler.session_string + "\"";
+		std::string command = "explorer \"" + s_ProjectDir + "profiler/" + core.profiler.session_string + "\"";
 		for (char &c : command)
 		{
 			if (c == '/') c = '\\';
@@ -411,8 +411,8 @@ void ImGuiRender()
 	{
 		try
 		{
-			std::filesystem::remove_all(s_ProjectDir + "profiling/" + core.profiler.session_string);
-			std::filesystem::create_directories(s_ProjectDir + "profiling/" + core.profiler.session_string);
+			std::filesystem::remove_all(s_ProjectDir + "profiler/" + core.profiler.session_string);
+			std::filesystem::create_directories(s_ProjectDir + "profiler/" + core.profiler.session_string);
 		}
 		catch (...)
 		{
@@ -424,8 +424,8 @@ void ImGuiRender()
 	{
 		try
 		{
-		std::filesystem::remove_all(s_ProjectDir + "profiling");
-		std::filesystem::create_directories(s_ProjectDir + "profiling/" + core.profiler.session_string);
+		std::filesystem::remove_all(s_ProjectDir + "profiler");
+		std::filesystem::create_directories(s_ProjectDir + "profiler/" + core.profiler.session_string);
 		}
 		catch (...)
 		{

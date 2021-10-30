@@ -1,6 +1,6 @@
 #include <Game/Chunk.h>
 #include <Data/CubeData.h>
-#include <Core/Profiling.h>
+#include <Core/Profiler.h>
 #include <Core/Core.h>
 
 #include <spdlog/spdlog.h>
