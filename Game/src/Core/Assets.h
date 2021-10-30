@@ -14,3 +14,5 @@ struct Stb_Image
 	Stb_Image(const std::string &path, bool flipVertically);
 	~Stb_Image();
 };
+
+extern std::string s_ProjectDir;

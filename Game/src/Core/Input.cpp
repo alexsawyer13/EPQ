@@ -1,5 +1,6 @@
 #include <Core/Input.h>
 #include <Core/Core.h>
+#include <Core/Profiling.h>
 
 #include <spdlog/spdlog.h>
 #include <imgui/imgui.h>
@@ -35,7 +36,10 @@ void InputUpdate()
 
 	// Poll GLFW events for callback functions
 
-	glfwPollEvents();
+	{
+		PROFILE_SCOPE_US("glfwPollEvents");
+		glfwPollEvents();
+	}
 
 	// Update mouse location
 

@@ -1,5 +1,5 @@
 #include <Physics/VoxelRayCast.h>
-#include <Core/Timer.h>
+#include <Core/Profiling.h>
 #include <Maths/Maths.h>
 
 #include <spdlog/spdlog.h>

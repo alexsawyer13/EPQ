@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Core/Profiling.h>
 #include <Graphics/Texture.h>
 #include <Graphics/Shader.h>
 #include <Graphics/TextureArray.h>
@@ -20,6 +21,7 @@ struct Core
 	// Platform
 	GLFWwindow *window;
 	Input input;
+	Profiler profiler;
 
 	// Game
 	World world;
@@ -38,7 +40,7 @@ struct Core
 	TextureArray item_texarray;
 	Cubemap cubemap;
 
-	// Blocks
+	// Data
 	std::vector<Block> Blocks;
 	std::vector<Item> Items;
 	std::unordered_map<unsigned int, BlockTexture> BlockTextures;

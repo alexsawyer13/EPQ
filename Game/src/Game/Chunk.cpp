@@ -1,6 +1,6 @@
 #include <Game/Chunk.h>
 #include <Data/CubeData.h>
-#include <Core/Timer.h>
+#include <Core/Profiling.h>
 #include <Core/Core.h>
 
 #include <spdlog/spdlog.h>
@@ -8,6 +8,8 @@
 
 void ChunkCreate(Chunk *chunk, int x, int z)
 {
+	PROFILE_SCOPE_US("ChunkCreate");
+
 	chunk->X = x;
 	chunk->Z = z;
 	chunk->Model = glm::translate(glm::mat4(1.0f), glm::vec3(x * CHUNK_WIDTH, 0, z * CHUNK_WIDTH));
@@ -70,7 +72,7 @@ void ChunkSetNeighbours(Chunk *chunk, Chunk *px, Chunk *nx, Chunk *pz, Chunk *nz
 
 void ChunkBuildMesh(Chunk *chunk)
 {
-	//ScopeTimerUs timer("ChunkBuildMesh");
+	PROFILE_SCOPE_US("ChunkBuildMesh");
 
 	std::vector<float> data;
 	std::vector<unsigned int> indices;

@@ -86,7 +86,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);GLFW_INCLUDE_NONE;GLFW_INCLUDE_NONE;SPDLOG_COMPILED_LIB</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GLFW_INCLUDE_NONE;PROFILER_ENABLE_ALL;SPDLOG_COMPILED_LIB</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)vendor;$(ProjectDir)src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -104,7 +104,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);GLFW_INCLUDE_NONE;GLFW_INCLUDE_NONE;SPDLOG_COMPILED_LIB</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GLFW_INCLUDE_NONE;PROFILER_ENABLE_ALL;SPDLOG_COMPILED_LIB;NDEBUG</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)vendor;$(ProjectDir)src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -123,7 +123,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions);GLFW_INCLUDE_NONE;GLFW_INCLUDE_NONE;SPDLOG_COMPILED_LIB</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GLFW_INCLUDE_NONE;PROFILER_ENABLE_ALL;SPDLOG_COMPILED_LIB</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)vendor;$(ProjectDir)src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -141,7 +141,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);GLFW_INCLUDE_NONE;GLFW_INCLUDE_NONE;SPDLOG_COMPILED_LIB</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GLFW_INCLUDE_NONE;PROFILER_ENABLE_ALL;SPDLOG_COMPILED_LIB;NDEBUG</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)vendor;$(ProjectDir)src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -160,7 +160,7 @@
     <ClCompile Include="src\Core\Assets.cpp" />
     <ClCompile Include="src\Core\Core.cpp" />
     <ClCompile Include="src\Core\Game.cpp" />
-    <ClCompile Include="src\Core\Timer.cpp" />
+    <ClCompile Include="src\Core\Profiling.cpp" />
     <ClCompile Include="src\Data\CubeData.cpp" />
     <ClCompile Include="src\Data\Blocks.cpp" />
     <ClCompile Include="src\Game\Player.cpp" />
@@ -197,7 +197,7 @@
     <ClInclude Include="src\Core\Assets.h" />
     <ClInclude Include="src\Core\Core.h" />
     <ClInclude Include="src\Core\Game.h" />
-    <ClInclude Include="src\Core\Timer.h" />
+    <ClInclude Include="src\Core\Profiling.h" />
     <ClInclude Include="src\Data\CubeData.h" />
     <ClInclude Include="src\Data\Blocks.h" />
     <ClInclude Include="src\Game\Chunk.h" />

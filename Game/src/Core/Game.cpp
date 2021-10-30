@@ -1,6 +1,8 @@
 #include <Core/Game.h>
 #include <Core/Core.h>
 #include <Core/Input.h>
+#include <Core/Profiling.h>
+#include <Core/Assets.h>
 #include <Game/Chunk.h>
 #include <Game/World.h>
 #include <Game/Player.h>
@@ -27,6 +29,7 @@
 #include <cstdio>
 #include <queue>
 #include <chrono>
+#include <filesystem>
 
 constexpr int DEFAULT_WIDTH = 1600;
 constexpr int DEFAULT_HEIGHT = 900;
@@ -34,6 +37,7 @@ GLenum SeverityLevel = GL_DEBUG_SEVERITY_HIGH;
 
 int frameCount = 0;
 float fps = 0.0f;
+ProfilerFrame frame;
 
 unsigned int currentAnimFrame = 0;
 std::chrono::system_clock::time_point lastAnimFrame;
@@ -42,14 +46,111 @@ constexpr int crosshair_size = 20.0f;
 
 void Run()
 {
+	// Setup
+	{
+		SCOPE_TIMER_MS("Setup");
+
+		core.profiler.session_string = GetTimeFormatted(); // TODO: MOVE THIS
+		printf("Session string: \"%s\"\n", core.profiler.session_string.c_str());
+		std::filesystem::create_directories(s_ProjectDir + "profiling/" + core.profiler.session_string);
+		
+		// Setup spdlog
+		spdlog::info("Running spdlog version {}.{}.{}", SPDLOG_VER_MAJOR, SPDLOG_VER_MINOR, SPDLOG_VER_PATCH);
+		spdlog::set_level(spdlog::level::trace);
+
+		// Initialise GLFW
+		if (!glfwInit())
+		{
+			spdlog::critical("Failed to initialise GLFW");
+			throw;
+		}
+
+		// Create GLFW window
+		core.window = glfwCreateWindow(DEFAULT_WIDTH, DEFAULT_HEIGHT, "Hello, world", NULL, NULL);
+		if (!core.window)
+		{
+			spdlog::critical("Failed to create GLFW window");
+			throw;
+		}
+
+		glfwMakeContextCurrent(core.window);
+		glfwSwapInterval(1);
+
+		// Load OpenGL
+		if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+		{
+			spdlog::critical("Failed to load OpenGL");
+			throw;
+		}
+
+		// Set GL debug callback
+		glEnable(GL_DEBUG_OUTPUT);
+		glDebugMessageCallback(MessageCallback, 0);
+
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		// Setup ImGUI
+		IMGUI_CHECKVERSION();
+		ImGui::CreateContext();
+		ImGuiIO &io = ImGui::GetIO(); (void)io;
+		ImGui::StyleColorsDark();
+		ImGui_ImplGlfw_InitForOpenGL(core.window, true);
+		ImGui_ImplOpenGL3_Init("#version 130");
+
+		// Load stuff
+		LoadCoreData();
+		InputSetup();
+
+		// Center window
+		const GLFWvidmode *mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+		if (!mode)
+			return;
+
+		int monitorX, monitorY;
+		glfwGetMonitorPos(glfwGetPrimaryMonitor(), &monitorX, &monitorY);
+
+		int windowWidth, windowHeight;
+		glfwGetWindowSize(core.window, &windowWidth, &windowHeight);
+
+		glfwSetWindowPos(core.window,
+			monitorX + (mode->width - windowWidth) / 2,
+			monitorY + (mode->height - windowHeight) / 2);
+
+		InputToggleCursorGrab();
+
+		// Setup objects
+		core.player.Position = glm::vec3(0.0f, 75.0f, 0.0f);
+		core.player.Pitch = -89.0f;
+		core.player.EnableFlight = true;
+
+		lastAnimFrame = std::chrono::system_clock::now();
+	}
+
 	while (!glfwWindowShouldClose(core.window))
 	{
 		Loop();
 	}
+
+	// Cleanup ImGUI
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
+
+	// Cleanup objects
+	WorldDestroy(&core.world);
+	FreeCoreData();
+	BatchDestroy(&core.uirenderer);
+
+	// Cleanup GLFW
+	glfwDestroyWindow(core.window);
+	glfwTerminate();
 }
 
 void Loop()
 {
+	START_PROFILER_FRAME();
+
 	frameCount++;
 
 	// Get window info
@@ -80,134 +181,80 @@ void Loop()
 
 	// Swap buffers
 	glfwSwapBuffers(core.window);
-}
 
-void Setup()
-{
-	// Setup spdlog
-	spdlog::info("Running spdlog version {}.{}.{}", SPDLOG_VER_MAJOR, SPDLOG_VER_MINOR, SPDLOG_VER_PATCH);
-
-	spdlog::set_level(spdlog::level::trace);
-
-	// Initialise GLFW
-	if (!glfwInit())
-	{
-		spdlog::critical("Failed to initialise GLFW");
-		throw;
-	}
-
-	// Create GLFW window
-	core.window = glfwCreateWindow(DEFAULT_WIDTH, DEFAULT_HEIGHT, "Hello, world", NULL, NULL);
-	if (!core.window)
-	{
-		spdlog::critical("Failed to create GLFW window");
-		throw;
-	}
-
-	glfwMakeContextCurrent(core.window);
-	glfwSwapInterval(1);
-
-	// Load OpenGL
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-	{
-		spdlog::critical("Failed to load OpenGL");
-		throw;
-	}
-
-	// Set GL debug callback
-	glEnable(GL_DEBUG_OUTPUT);
-	glDebugMessageCallback(MessageCallback, 0);
-
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	// Setup ImGUI
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGuiIO &io = ImGui::GetIO(); (void)io;
-	ImGui::StyleColorsDark();
-	ImGui_ImplGlfw_InitForOpenGL(core.window, true);
-	ImGui_ImplOpenGL3_Init("#version 130");
-
-	// Load stuff
-	LoadCoreData();
-	InputSetup();
-
-	// Center window
-	const GLFWvidmode *mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-	if (!mode)
-		return;
-
-	int monitorX, monitorY;
-	glfwGetMonitorPos(glfwGetPrimaryMonitor(), &monitorX, &monitorY);
-
-	int windowWidth, windowHeight;
-	glfwGetWindowSize(core.window, &windowWidth, &windowHeight);
-
-	glfwSetWindowPos(core.window,
-		monitorX + (mode->width - windowWidth) / 2,
-		monitorY + (mode->height - windowHeight) / 2);
-
-	InputToggleCursorGrab();
-
-	// Setup objects
-	core.player.Position = glm::vec3(0.0f, 75.0f, 0.0f);
-	core.player.Pitch = -89.0f;
-	core.player.EnableFlight = true;
-
-	lastAnimFrame = std::chrono::system_clock::now();
-}
-
-void Cleanup()
-{
-	// Cleanup ImGUI
-	ImGui_ImplOpenGL3_Shutdown();
-	ImGui_ImplGlfw_Shutdown();
-	ImGui::DestroyContext();
-
-	// Cleanup objects
-	WorldDestroy(&core.world);
-	FreeCoreData();
-	BatchDestroy(&core.uirenderer);
-
-	// Cleanup GLFW
-	glfwDestroyWindow(core.window);
-	glfwTerminate();
+	END_PROFILER_FRAME();
 }
 
 void Update()
 {
+	PROFILE_SCOPE_US("Update");
+
 	// Handle input
-	InputUpdate();
+	{
+		PROFILE_SCOPE_US("InputUpdate");
+		InputUpdate();
+	}
 
 	if (core.input.Keys[GLFW_KEY_ESCAPE] == Pressed)
 		InputToggleCursorGrab();
 
-	PlayerUpdate(&core.player, &core.world);
-	WorldUpdate(&core.world);
+	{
+		PROFILE_SCOPE_US("PlayerUpdate");
+		PlayerUpdate(&core.player, &core.world);
+	}
+	{
+		PROFILE_SCOPE_US("WorldUpdate");
+		WorldUpdate(&core.world);
+	}
 
 	// Test raycasting
 
-	if (core.input.Keys[GLFW_MOUSE_BUTTON_LEFT] == Pressed)
 	{
-		Raycast raycast = VoxelRayCast(&core.world, core.player.Position, core.player.Direction);
-		if (raycast.Hit)
-			WorldBreakBlock(&core.world, raycast.Block.x, raycast.Block.y, raycast.Block.z);
+		PROFILE_SCOPE_US("Raycasting");
+
+		if (core.input.Keys[GLFW_MOUSE_BUTTON_LEFT] == Pressed)
+		{
+			Raycast raycast = VoxelRayCast(&core.world, core.player.Position, core.player.Direction);
+			if (raycast.Hit)
+				WorldBreakBlock(&core.world, raycast.Block.x, raycast.Block.y, raycast.Block.z);
+		}
+
+		if (core.input.Keys[GLFW_MOUSE_BUTTON_RIGHT] == Pressed)
+		{
+			Raycast raycast = VoxelRayCast(&core.world, core.player.Position, core.player.Direction);
+			if (raycast.Hit)
+				WorldSetBlock(&core.world, raycast.Block.x + raycast.Normal.x, raycast.Block.y + raycast.Normal.y, raycast.Block.z + raycast.Normal.z, core.BlockIds["furnace_on"]);
+		}
+
+		if (core.input.Keys[GLFW_KEY_K] == Pressed)
+			core.player.EnableFlight = !core.player.EnableFlight;
 	}
 
-	if (core.input.Keys[GLFW_MOUSE_BUTTON_RIGHT] == Pressed)
-	{
-		Raycast raycast = VoxelRayCast(&core.world, core.player.Position, core.player.Direction);
-		if (raycast.Hit)
-			WorldSetBlock(&core.world, raycast.Block.x + raycast.Normal.x, raycast.Block.y + raycast.Normal.y, raycast.Block.z + raycast.Normal.z, core.BlockIds["furnace_on"]);
-	}
+	// Csv stuff
 
-	if (core.input.Keys[GLFW_KEY_K] == Pressed)
-		core.player.EnableFlight = !core.player.EnableFlight;
+#ifdef PROFILER_ENABLE_CSV
+	{
+		PROFILE_SCOPE_US("CsvStuff");
+
+		CsvAddData(core.profiler.current_csv, "Frame", frameCount);
+		CsvAddData(core.profiler.current_csv, "Frametime", (int)(core.input.DeltaTime * 1000000));
+		for (auto micro : core.profiler.last_frame.Microseconds)
+		{
+			CsvAddData(core.profiler.current_csv, micro.first, micro.second);
+		}
+		for (auto milli : core.profiler.last_frame.Milliseconds)
+		{
+			CsvAddData(core.profiler.current_csv, milli.first, milli.second * 1000);
+		}
+		CsvNextRow(core.profiler.current_csv);
+	}
+#endif
 }
 
 void OpenGLRender(int width, int height)
 {
+	PROFILE_SCOPE_US("OpenGLRender");
+
 	glm::mat4 view = core.player.View;
 	glm::mat4 proj = glm::perspective(glm::radians(45.0f), (float)width / height, 0.1f, 1000.0f);
 	glm::mat4 ortho = glm::ortho(0.0f, (float)width, 0.0f, (float)height);
@@ -216,66 +263,177 @@ void OpenGLRender(int width, int height)
 	// TODO: Render after everything else with fancy depth testing
 	core.cubemap.Render(view, proj);
 
-	// Draw chunks
-	core.shaders["optimisedtexarray"].Bind();
-	core.shaders["optimisedtexarray"].SetMat4("u_View", view);
-	core.shaders["optimisedtexarray"].SetMat4("u_Proj", proj);
-	core.shaders["optimisedtexarray"].SetInt("u_Texture", 0);
-
-	core.block_texarray.Bind(0);
-
-	auto currentTime = std::chrono::system_clock::now();
-	auto timeSinceLastAnimFrame = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastAnimFrame).count();
-
-	if (timeSinceLastAnimFrame > animDelay)
 	{
-		currentAnimFrame++;
-		core.shaders["optimisedtexarray"].SetUnsignedInt("u_CurrentAnimationFrame", currentAnimFrame);
-		lastAnimFrame = currentTime;
+		PROFILE_SCOPE_US("DrawChunks");
+
+		// Draw chunks
+		core.shaders["optimisedtexarray"].Bind();
+		core.shaders["optimisedtexarray"].SetMat4("u_View", view);
+		core.shaders["optimisedtexarray"].SetMat4("u_Proj", proj);
+		core.shaders["optimisedtexarray"].SetInt("u_Texture", 0);
+
+		core.block_texarray.Bind(0);
+
+		auto currentTime = std::chrono::system_clock::now();
+		auto timeSinceLastAnimFrame = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastAnimFrame).count();
+
+		if (timeSinceLastAnimFrame > animDelay)
+		{
+			currentAnimFrame++;
+			core.shaders["optimisedtexarray"].SetUnsignedInt("u_CurrentAnimationFrame", currentAnimFrame);
+			lastAnimFrame = currentTime;
+		}
+
+		{
+			PROFILE_SCOPE_US("WorldDrawChunks");
+			WorldDrawChunks(&core.world);
+		}
 	}
 
-	WorldDrawChunks(&core.world);
+	{
+		PROFILE_SCOPE_US("Draw UI");
 
+		glEnable(GL_BLEND);
 
-	// Draw UI
+		core.shaders["batch"].Bind();
+		core.shaders["batch"].SetMat4("u_Proj", ortho);
 
-	glEnable(GL_BLEND);
+		// Crosshair
+		core.uirenderer.Quads.push_back({
+				{float(width - crosshair_size) / 2, float(height - crosshair_size) / 2, 0},
+				{(float)crosshair_size, (float)crosshair_size},
+				&core.textures["crosshair"]
+			});
 
-	core.shaders["batch"].Bind();
-	core.shaders["batch"].SetMat4("u_Proj", ortho);
+		glClear(GL_DEPTH_BUFFER_BIT);
+		BatchFlush(&core.uirenderer);
 
-	// Crosshair
-	core.uirenderer.Quads.push_back({
-			{float(width - crosshair_size) / 2, float(height - crosshair_size) / 2, 0},
-			{(float)crosshair_size, (float)crosshair_size},
-			&core.textures["crosshair"]
-		});
-
-	glClear(GL_DEPTH_BUFFER_BIT);
-	BatchFlush(&core.uirenderer);
-
-
-	glDisable(GL_BLEND);
+		glDisable(GL_BLEND);
+	}
 }
 
 void ImGuiRender()
 {
-	ImGui::Begin("Camera");
-	ImGui::SliderFloat("Pitch", &core.player.Pitch, -90.0f, 90.0f, nullptr, 0);
-	ImGui::SliderFloat("Yaw", &core.player.Yaw, -180.0f, 180.0f, nullptr, 0);
-	ImGui::SliderFloat3("Position", &core.player.Position[0], -10.0f, 10.0f, nullptr, 0);
-	ImGui::SliderFloat("Speed", &core.player.Speed, 0.0f, 10.0f, nullptr, 0);
-	ImGui::SliderFloat("Sensitivity", &core.player.Sensitivity, 0.0f, 10.0f, nullptr, 0);
+	PROFILE_SCOPE_US("ImGuiRender");
+
+	if (frameCount % 30 == 0)
+	{
+		fps = 1.0f / core.input.DeltaTime;
+		frame = core.profiler.last_frame;
+	}
+
+	int animDelayInt = (int)animDelay;
+
+	ImGui::Begin("Player Info");
+	ImGui::Text("Position: (%f, %f, %f)", core.player.Position.x, core.player.Position.y, core.player.Position.z);
+	ImGui::Text("Camera: (%f, %f)", core.player.Pitch, core.player.Yaw);
 	ImGui::End();
 
-	if (frameCount % 10 == 0)
-		fps = 1.0f / core.input.DeltaTime;
-
-	int animDelayInt = animDelay;
-
-	ImGui::Begin("Info");
-	ImGui::Text("FPS: %f", fps);
+	ImGui::Begin("Debug");
+	ImGui::SliderFloat("Speed", &core.player.Speed, 0.0f, 25.0f, nullptr, 0);
 	ImGui::SliderInt("Animation delay (ms)", &animDelayInt, 1, 1000, nullptr);
+	ImGui::End();
+
+	ImGui::Begin("Performance");
+	ImGui::Text("FPS: %f", fps);
+	ImGui::Text("Chunk updates queued: %d", core.world.PendingMesh.size());
+
+#ifdef PROFILER_ENABLE_PROFILER
+	if (ImGui::BeginTable("Function Times", 2))
+	{
+		ImGui::TableSetupColumn("Function");
+		ImGui::TableSetupColumn("Time");
+		ImGui::TableHeadersRow();
+
+		for (auto micro : frame.Microseconds)
+		{
+			ImGui::TableNextColumn();
+			ImGui::Text("%s", micro.first);
+			ImGui::TableNextColumn();
+			ImGui::Text("%5lld us", micro.second);
+			ImGui::TableNextRow();
+		}
+		for (auto milli : frame.Milliseconds)
+		{
+			ImGui::TableNextColumn();
+			ImGui::Text("%s", milli.first);
+			ImGui::TableNextColumn();
+			ImGui::Text("%5lld ms", milli.second);
+			ImGui::TableNextRow();
+		}
+		ImGui::EndTable();
+	}
+
+	if (ImGui::Button("Create profiler csv"))
+	{
+		CsvFlush(core.profiler.current_csv);
+	}
+
+	ImGui::TextWrapped("Most recent csv: %s", core.profiler.most_recent_csv.c_str());
+
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
+	if (ImGui::Button("Open profiler csv"))
+	{
+		if (!core.profiler.most_recent_csv.empty())
+		{
+			std::string copy = core.profiler.most_recent_csv;
+			for (auto &c : copy)
+			{
+				if (c == '/') c = '\\';
+			}
+			std::string command = "start \"csv\" \"" + core.profiler.most_recent_csv + "\"";
+			system(command.c_str());
+		}
+	}
+
+	if (ImGui::Button("Open session directory"))
+	{
+		std::string command = "explorer \"" + s_ProjectDir + "profiling/" + core.profiler.session_string + "\"";
+		for (char &c : command)
+		{
+			if (c == '/') c = '\\';
+		}
+		system(command.c_str());
+	}
+#endif
+
+	if (ImGui::Button("Clear CSV data"))
+	{
+		core.profiler.current_csv.columns.clear();
+		core.profiler.current_csv.hashed_columns.clear();
+		core.profiler.current_csv.rows.clear();
+		core.profiler.current_csv.current_row.clear();
+	}
+
+	ImGui::Spacing();
+
+	if (ImGui::Button("Clear session data"))
+	{
+		try
+		{
+			std::filesystem::remove_all(s_ProjectDir + "profiling/" + core.profiler.session_string);
+			std::filesystem::create_directories(s_ProjectDir + "profiling/" + core.profiler.session_string);
+		}
+		catch (...)
+		{
+			spdlog::error("Failed to clear session data");
+		}
+	}
+
+	if (ImGui::Button("Clear profiler data"))
+	{
+		try
+		{
+		std::filesystem::remove_all(s_ProjectDir + "profiling");
+		std::filesystem::create_directories(s_ProjectDir + "profiling/" + core.profiler.session_string);
+		}
+		catch (...)
+		{
+			spdlog::error("Failed to clear profiler data");
+		}
+	}
+#endif
+
 	ImGui::End();
 
 	animDelay = (int)animDelayInt;

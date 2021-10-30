@@ -3,9 +3,6 @@
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
 
-void Setup();
-void Cleanup();
-
 void Run();
 void Loop();
 
