@@ -11,7 +11,7 @@ struct Player
 	bool EnableFlight, EnableNoclip;
 
 	float Pitch, Yaw;
-	float Speed, Sensitivity;
+	float BaseSpeed, Speed, Sensitivity;
 	glm::vec3 Direction, Right, Up;
 	glm::mat4 View;
 };

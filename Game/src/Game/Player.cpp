@@ -26,6 +26,7 @@ void PlayerCreate(Player *player, float speed, float sensitivity)
 	player->Velocity = glm::vec3(0.0f);
 	player->Pitch = 0.0f;
 	player->Yaw = 0.0f;
+	player->BaseSpeed = speed;
 	player->Speed = speed;
 	player->Sensitivity = sensitivity;
 
@@ -37,9 +38,27 @@ void PlayerCreate(Player *player, float speed, float sensitivity)
 
 void PlayerUpdate(Player *player, World *world)
 {
-	PlayerGetInput(player);
-	PlayerUpdatePhysics(player, world);
-	PlayerCalculateView(player);
+	if (core.input.Keys[GLFW_KEY_LEFT_CONTROL] == Down)
+	{
+		core.player.Speed = 10 * core.player.BaseSpeed;
+	}
+	else
+	{
+		player->Speed = player->BaseSpeed;
+	}
+
+	{
+		PROFILE_SCOPE_US("PlayerGetInput");
+		PlayerGetInput(player);
+	}
+	{
+		PROFILE_SCOPE_US("PlayerUpdatePhysics");
+		PlayerUpdatePhysics(player, world);
+	}
+	{
+		PROFILE_SCOPE_US("PlayerCalculateView");
+		PlayerCalculateView(player);
+	}
 }
 
 void PlayerGetInput(Player *player)

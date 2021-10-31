@@ -312,11 +312,14 @@ void OpenGLRender(int width, int height)
 	}
 }
 
+int frame_delay = 30;
+
 void ImGuiRender()
 {
 	PROFILE_SCOPE_US("ImGuiRender");
 
-	if (frameCount % 30 == 0)
+
+	if (frameCount % frame_delay == 0)
 	{
 		fps = 1.0f / core.input.DeltaTime;
 		frame = core.profiler.last_frame;
@@ -330,13 +333,15 @@ void ImGuiRender()
 	ImGui::End();
 
 	ImGui::Begin("Debug");
-	ImGui::SliderFloat("Speed", &core.player.Speed, 0.0f, 25.0f, nullptr, 0);
+
+	ImGui::SliderFloat("Speed", &core.player.BaseSpeed, 0.0f, 25.0f, nullptr, 0);
 	ImGui::SliderInt("Animation delay (ms)", &animDelayInt, 1, 1000, nullptr);
 	ImGui::End();
 
 	ImGui::Begin("Performance");
 	ImGui::Text("FPS: %f", fps);
 	ImGui::Text("Chunk updates queued: %d", core.world.PendingMesh.size());
+	ImGui::SliderInt("frame_delay", &frame_delay, 1, 100);
 
 #ifdef PROFILER_ENABLE_PROFILER
 	if (ImGui::BeginTable("Function Times", 2))
@@ -348,7 +353,7 @@ void ImGuiRender()
 		for (auto micro : frame.Microseconds)
 		{
 			ImGui::TableNextColumn();
-			ImGui::Text("%s", micro.first);
+			ImGui::Text("%s", micro.first.c_str());
 			ImGui::TableNextColumn();
 			ImGui::Text("%5lld us", micro.second);
 			ImGui::TableNextRow();
@@ -356,7 +361,7 @@ void ImGuiRender()
 		for (auto milli : frame.Milliseconds)
 		{
 			ImGui::TableNextColumn();
-			ImGui::Text("%s", milli.first);
+			ImGui::Text("%s", milli.first.c_str());
 			ImGui::TableNextColumn();
 			ImGui::Text("%5lld ms", milli.second);
 			ImGui::TableNextRow();
@@ -413,6 +418,7 @@ void ImGuiRender()
 		{
 			std::filesystem::remove_all(s_ProjectDir + "profiler/" + core.profiler.session_string);
 			std::filesystem::create_directories(s_ProjectDir + "profiler/" + core.profiler.session_string);
+			core.profiler.most_recent_csv.clear();
 		}
 		catch (...)
 		{
@@ -424,8 +430,9 @@ void ImGuiRender()
 	{
 		try
 		{
-		std::filesystem::remove_all(s_ProjectDir + "profiler");
-		std::filesystem::create_directories(s_ProjectDir + "profiler/" + core.profiler.session_string);
+			std::filesystem::remove_all(s_ProjectDir + "profiler");
+			std::filesystem::create_directories(s_ProjectDir + "profiler/" + core.profiler.session_string);
+			core.profiler.most_recent_csv.clear();
 		}
 		catch (...)
 		{
