@@ -3,7 +3,7 @@
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
 
-void Run();
+void Start();
 void Loop();
 
 void Update();

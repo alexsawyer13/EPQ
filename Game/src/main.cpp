@@ -5,5 +5,5 @@ int main()
 #ifndef NDEBUG
 	//static_assert(false);
 #endif
-	Run();
+	Start();
 }

@@ -148,7 +148,7 @@ void BatchRender(BatchRenderer *renderer)
 
 		// Flush any remaining quads
 
-		// TEMP
+		// TODO: TEMP
 
 		if (numQuads > 0)
 		{

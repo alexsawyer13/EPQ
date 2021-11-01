@@ -57,16 +57,21 @@ void LoadCoreData()
 	IboData(&core.ibos["rectangle"], sizeof(rectangleIndices), rectangleIndices, GL_STATIC_DRAW);
 	VaoSetIbo(&core.vaos["rectangle"], &core.ibos["rectangle"]);
 
+	// Load textures
 	core.textures["crosshair"] = {};
 	Texture2DCreate(&core.textures["crosshair"]);
 	Stb_Image image("textures/crosshair.png", true);
 	Texture2DSetData(&core.textures["crosshair"], &image);
 
-	// Load textures
-	core.textures["inventory"] = {};
-	Texture2DCreate(&core.textures["inventory"]);
-	Stb_Image image2("textures/gui/container/inventory.png", true);
-	Texture2DSetData(&core.textures["inventory"], &image2);
+	core.textures["none"] = {};
+	Texture2DCreate(&core.textures["none"]);
+	Stb_Image none_texture_image("textures/none.png", true);
+	Texture2DSetData(&core.textures["none"], &none_texture_image);
+
+	core.textures["hotbar_icon"] = {};
+	Texture2DCreate(&core.textures["hotbar_icon"]);
+	Stb_Image image2("textures/hotbar_icon_piskel.png", true);
+	Texture2DSetData(&core.textures["hotbar_icon"], &image2);
 
 	// Load objects
 	WorldCreate(&core.world);

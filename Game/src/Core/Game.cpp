@@ -31,9 +31,9 @@
 #include <chrono>
 #include <filesystem>
 
-constexpr int DEFAULT_WIDTH = 1600;
-constexpr int DEFAULT_HEIGHT = 900;
-GLenum SeverityLevel = GL_DEBUG_SEVERITY_HIGH;
+constexpr int DEFAULT_WIDTH = 1366;
+constexpr int DEFAULT_HEIGHT = 768;
+GLenum SeverityLevel = GL_DEBUG_SEVERITY_LOW;
 
 int frameCount = 0;
 float fps = 0.0f;
@@ -44,7 +44,11 @@ std::chrono::system_clock::time_point lastAnimFrame;
 long long animDelay = 100.0f;
 constexpr int crosshair_size = 20.0f;
 
-void Run()
+glm::vec3 default_player_position = glm::vec3(0.0f, 75.0f, 0.0f);
+
+bool ImGui_enabled = true;
+
+void Start()
 {
 	// Setup
 	{
@@ -120,7 +124,7 @@ void Run()
 		InputToggleCursorGrab();
 
 		// Setup objects
-		core.player.Position = glm::vec3(0.0f, 75.0f, 0.0f);
+		core.player.Position = default_player_position;
 		core.player.Pitch = -89.0f;
 		core.player.EnableFlight = true;
 
@@ -166,18 +170,19 @@ void Loop()
 	// Update function
 	Update();
 
-	// ImGui render
-	ImGui_ImplOpenGL3_NewFrame();
-	ImGui_ImplGlfw_NewFrame();
-	ImGui::NewFrame();
-	ImGuiRender();
-
 	// OpenGL render
 	OpenGLRender(width, height);
 
 	// Render ImGUI frame
-	ImGui::Render();
-	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+	if (ImGui_enabled)
+	{
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+		ImGuiRender();
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+	}
 
 	// Swap buffers
 	glfwSwapBuffers(core.window);
@@ -197,6 +202,11 @@ void Update()
 
 	if (core.input.Keys[GLFW_KEY_ESCAPE] == Pressed)
 		InputToggleCursorGrab();
+
+	if (core.input.Keys[GLFW_KEY_F3] == Pressed)
+	{
+		ImGui_enabled = !ImGui_enabled;
+	}
 
 	{
 		PROFILE_SCOPE_US("PlayerUpdate");
@@ -291,7 +301,7 @@ void OpenGLRender(int width, int height)
 	}
 
 	{
-		PROFILE_SCOPE_US("Draw UI");
+		PROFILE_SCOPE_US("DrawUI");
 
 		glEnable(GL_BLEND);
 
@@ -302,8 +312,18 @@ void OpenGLRender(int width, int height)
 		core.uirenderer.Quads.push_back({
 				{float(width - crosshair_size) / 2, float(height - crosshair_size) / 2, 0},
 				{(float)crosshair_size, (float)crosshair_size},
-				&core.textures["crosshair"]
+				&core.textures["hotbar_icon"]
 			});
+
+		// Hotbar
+		for (int i = 0; i < 9; i++)
+		{
+			core.uirenderer.Quads.push_back({
+				{(width-9*64)/2 + i*64, 0, 0},
+				{64, 64},
+				&core.textures["hotbar_icon"]
+				});
+		}
 
 		glClear(GL_DEPTH_BUFFER_BIT);
 		BatchFlush(&core.uirenderer);
@@ -330,6 +350,10 @@ void ImGuiRender()
 	ImGui::Begin("Player Info");
 	ImGui::Text("Position: (%f, %f, %f)", core.player.Position.x, core.player.Position.y, core.player.Position.z);
 	ImGui::Text("Camera: (%f, %f)", core.player.Pitch, core.player.Yaw);
+	if (ImGui::Button("Reset player position"))
+	{
+		core.player.Position = default_player_position;
+	}
 	ImGui::End();
 
 	ImGui::Begin("Debug");
