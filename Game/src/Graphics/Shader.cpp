@@ -59,7 +59,7 @@ GLuint Shader::LoadShader(const std::string &source, GLenum type)
 		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &temp);
 		char *log = new char[temp];
 		glGetShaderInfoLog(shader, temp, nullptr, log);
-		spdlog::critical("Failed to compile shader: {}\n{}", source, log);
+		spdlog::critical("Failed to compile shader: \n{}\n{}", source, log);
 		delete[] log;
 	}
 

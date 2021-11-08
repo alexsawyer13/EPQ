@@ -5,7 +5,7 @@
 #include <array>
 
 /*
-static float rectangleVertices[] = {
+static loat rectangleVertices[] = {
 	1.0f, 1.0f, 0.0f, 1.0f, 1.0f, // Top right
 	0.0f, 1.0f, 0.0f, 0.0f, 1.0f, // Top left
 	1.0f, 0.0f, 0.0f, 1.0f, 0.0f, // Bottom right
@@ -48,7 +48,7 @@ void BatchCreate(BatchRenderer *renderer)
 
 	IboData(&renderer->Ibo, INDEX_BUFFER_SIZE, &indices[0], GL_DYNAMIC_DRAW);
 
-	VaoAddVbo(&renderer->Vao, &renderer->Vbo, BufferLayout{ {3, GL_FLOAT}, {2, GL_FLOAT}, {1, GL_UNSIGNED_INT} });
+	VaoAddVbo(&renderer->Vao, &renderer->Vbo, BufferLayout{ {3, GL_FLOAT}, {2, GL_FLOAT}, {1, GL_FLOAT} });
 	VaoSetIbo(&renderer->Vao, &renderer->Ibo);
 }
 
@@ -114,7 +114,7 @@ void BatchRender(BatchRenderer *renderer)
 				data.push_back(quad->Position.z);
 				data.push_back(1.0f);
 				data.push_back(1.0f);
-				data.push_back(reinterpret_cast<float &>(j));
+				data.push_back(float(j));
 
 				// Top left
 				data.push_back(quad->Position.x);
@@ -122,7 +122,7 @@ void BatchRender(BatchRenderer *renderer)
 				data.push_back(quad->Position.z);
 				data.push_back(0.0f);
 				data.push_back(1.0f);
-				data.push_back(reinterpret_cast<float &>(j));
+				data.push_back(float(j));
 
 				// Bottom right
 				data.push_back(quad->Position.x + quad->Size.x);
@@ -130,7 +130,7 @@ void BatchRender(BatchRenderer *renderer)
 				data.push_back(quad->Position.z);
 				data.push_back(1.0f);
 				data.push_back(0.0f);
-				data.push_back(reinterpret_cast<float &>(j));
+				data.push_back(float(j));
 
 				// Bottom left
 				data.push_back(quad->Position.x);
@@ -138,7 +138,7 @@ void BatchRender(BatchRenderer *renderer)
 				data.push_back(quad->Position.z);
 				data.push_back(0.0f);
 				data.push_back(0.0f);
-				data.push_back(reinterpret_cast<float &>(j));
+				data.push_back(float(j));
 
 				numQuads++;
 			}

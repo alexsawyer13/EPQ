@@ -186,7 +186,7 @@ void Loop()
 
 	// Swap buffers
 	glfwSwapBuffers(core.window);
-
+	
 	END_PROFILER_FRAME();
 }
 
@@ -312,7 +312,7 @@ void OpenGLRender(int width, int height)
 		core.uirenderer.Quads.push_back({
 				{float(width - crosshair_size) / 2, float(height - crosshair_size) / 2, 0},
 				{(float)crosshair_size, (float)crosshair_size},
-				&core.textures["hotbar_icon"]
+				&core.textures["crosshair"]
 			});
 
 		// Hotbar

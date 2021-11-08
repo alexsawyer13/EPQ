@@ -23,7 +23,7 @@ void main()
 {
     gl_Position = u_Proj * u_View * u_Model * vec4(a_Pos, 1.0);
     
-    int texValue = int(a_TextureValue);
+    uint texValue = uint(a_TextureValue);
 
     v_TexCoord = texCoords[texValue % 4];
     v_Index = uint(texValue / 4);
