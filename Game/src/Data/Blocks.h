@@ -61,4 +61,4 @@ struct BlockTexture
 };
 
 void LoadGameData();
-BlockTexture LoadTexture(const std::string &path, unsigned int currentId);
+BlockTexture LoadBlockTexture(const std::string &path, unsigned int currentId);

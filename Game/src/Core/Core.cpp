@@ -60,17 +60,17 @@ void LoadCoreData()
 	// Load textures
 	core.textures["crosshair"] = {};
 	Texture2DCreate(&core.textures["crosshair"]);
-	Stb_Image image("textures/crosshair.png", true);
+	Image image("textures/crosshair.png", true);
 	Texture2DSetData(&core.textures["crosshair"], &image);
 
 	core.textures["none"] = {};
 	Texture2DCreate(&core.textures["none"]);
-	Stb_Image none_texture_image("textures/none.png", true);
+	Image none_texture_image("textures/none.png", true);
 	Texture2DSetData(&core.textures["none"], &none_texture_image);
 
 	core.textures["hotbar_icon"] = {};
 	Texture2DCreate(&core.textures["hotbar_icon"]);
-	Stb_Image image2("textures/hotbar_icon_piskel.png", true);
+	Image image2("textures/hotbar_icon_piskel.png", true);
 	Texture2DSetData(&core.textures["hotbar_icon"], &image2);
 
 	// Load objects

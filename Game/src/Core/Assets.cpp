@@ -35,9 +35,10 @@ std::string ReadAsset(const std::string &p)
 	return ReadFile("assets/" + p);
 }
 
-Stb_Image::Stb_Image(const std::string &path, bool flipVertically)
-	: Path(s_ProjectDir + "assets/" + path)
+Image::Image(const std::string &path, bool flipVertically)
 {
+	Path = s_ProjectDir + "assets/" + path;
+	Type = ImageType::STB_IMAGE;
 	stbi_set_flip_vertically_on_load(flipVertically);
 	Data = stbi_load(Path.c_str(), &Width, &Height, &Channels, 0);
 	if (!Data)
@@ -46,8 +47,35 @@ Stb_Image::Stb_Image(const std::string &path, bool flipVertically)
 	}
 }
 
-Stb_Image::~Stb_Image()
+Image::Image(unsigned char *data, int width, int height, int channels, bool owns_data)
+{
+	Width = width;
+	Height = height;
+	Channels = channels;
+
+	// Copy data if not owned
+	if (owns_data)
+	{
+		Data = data;
+	}
+	else
+	{
+		Data = new unsigned char[width * height * channels];
+		memcpy(Data, data, width * height * channels);
+	}
+}
+
+Image::~Image()
 {
 	if (Data)
-		stbi_image_free(Data);
+	{
+		switch (Type)
+		{
+		case ImageType::STB_IMAGE:
+			stbi_image_free(Data);
+			break;
+		case ImageType::RAW_IMAGE:
+			delete[] Data;
+		}
+	}
 }

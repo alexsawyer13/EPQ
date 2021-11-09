@@ -38,7 +38,7 @@ void LoadGameData()
 		auto texIter = core.BlockTextureIds.find(texture); // See if it's already been cached
 		if (texIter == core.BlockTextureIds.end()) // If it hasn't been cached
 		{
-			BlockTexture blockTexture = LoadTexture(texture, currentId); // Load the textures
+			BlockTexture blockTexture = LoadBlockTexture(texture, currentId); // Load the textures
 			core.BlockTextureIds[texture] = currentId; // Add it to the hashmap of names to ids with correct id
 			core.BlockTextures[currentId] = blockTexture; // Add it to the hasmap of ids to textures
 			currentId += blockTexture.AnimationFrames;
@@ -49,7 +49,7 @@ void LoadGameData()
 		texIter = core.BlockTextureIds.find(texture); // See if it's already been cached
 		if (texIter == core.BlockTextureIds.end()) // If it hasn't been cached
 		{
-			BlockTexture blockTexture = LoadTexture(texture, currentId); // Load the textures
+			BlockTexture blockTexture = LoadBlockTexture(texture, currentId); // Load the textures
 			core.BlockTextureIds[texture] = currentId; // Add it to the hashmap of names to ids with correct id
 			core.BlockTextures[currentId] = blockTexture; // Add it to the hasmap of ids to textures
 			currentId += blockTexture.AnimationFrames;
@@ -60,7 +60,7 @@ void LoadGameData()
 		texIter = core.BlockTextureIds.find(texture); // See if it's already been cached
 		if (texIter == core.BlockTextureIds.end()) // If it hasn't been cached
 		{
-			BlockTexture blockTexture = LoadTexture(texture, currentId); // Load the textures
+			BlockTexture blockTexture = LoadBlockTexture(texture, currentId); // Load the textures
 			core.BlockTextureIds[texture] = currentId; // Add it to the hashmap of names to ids with correct id
 			core.BlockTextures[currentId] = blockTexture; // Add it to the hasmap of ids to textures
 			currentId += blockTexture.AnimationFrames;
@@ -71,7 +71,7 @@ void LoadGameData()
 		texIter = core.BlockTextureIds.find(texture); // See if it's already been cached
 		if (texIter == core.BlockTextureIds.end()) // If it hasn't been cached
 		{
-			BlockTexture blockTexture = LoadTexture(texture, currentId); // Load the textures
+			BlockTexture blockTexture = LoadBlockTexture(texture, currentId); // Load the textures
 			core.BlockTextureIds[texture] = currentId; // Add it to the hashmap of names to ids with correct id
 			core.BlockTextures[currentId] = blockTexture; // Add it to the hasmap of ids to textures
 			currentId += blockTexture.AnimationFrames;
@@ -82,7 +82,7 @@ void LoadGameData()
 		texIter = core.BlockTextureIds.find(texture); // See if it's already been cached
 		if (texIter == core.BlockTextureIds.end()) // If it hasn't been cached
 		{
-			BlockTexture blockTexture = LoadTexture(texture, currentId); // Load the textures
+			BlockTexture blockTexture = LoadBlockTexture(texture, currentId); // Load the textures
 			core.BlockTextureIds[texture] = currentId; // Add it to the hashmap of names to ids with correct id
 			core.BlockTextures[currentId] = blockTexture; // Add it to the hasmap of ids to textures
 			currentId += blockTexture.AnimationFrames;
@@ -93,7 +93,7 @@ void LoadGameData()
 		texIter = core.BlockTextureIds.find(texture); // See if it's already been cached
 		if (texIter == core.BlockTextureIds.end()) // If it hasn't been cached
 		{
-			BlockTexture blockTexture = LoadTexture(texture, currentId); // Load the textures
+			BlockTexture blockTexture = LoadBlockTexture(texture, currentId); // Load the textures
 			core.BlockTextureIds[texture] = currentId; // Add it to the hashmap of names to ids with correct id
 			core.BlockTextures[currentId] = blockTexture; // Add it to the hasmap of ids to textures
 			currentId += blockTexture.AnimationFrames;
@@ -105,9 +105,9 @@ void LoadGameData()
 	}
 
 	// Load items
-	std::string itemFile = ReadAsset("data/items.json");
-	rapidjson::Document itemJson;
-	itemJson.Parse(itemFile.c_str());
+	//std::string itemFile = ReadAsset("data/items.json");
+	//rapidjson::Document itemJson;
+	//itemJson.Parse(itemFile.c_str());
 
 	// Loop through items
 	//for (auto iter = itemJson.MemberBegin(); iter != itemJson.MemberEnd(); ++iter)
@@ -132,13 +132,13 @@ void LoadGameData()
 	//}
 }
 
-BlockTexture LoadTexture(const std::string &path, unsigned int currentId)
+BlockTexture LoadBlockTexture(const std::string &path, unsigned int currentId)
 {
 	BlockTexture texture;
 	texture.Id = currentId;
 	texture.Name = path;
 
-	Stb_Image image("textures/" + path + ".png", true);
+	Image image("textures/" + path + ".png", true);
 
 	if (image.Width != T_WIDTH)
 	{

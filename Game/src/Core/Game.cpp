@@ -233,7 +233,7 @@ void Update()
 		{
 			Raycast raycast = VoxelRayCast(&core.world, core.player.Position, core.player.Direction);
 			if (raycast.Hit)
-				WorldSetBlock(&core.world, raycast.Block.x + raycast.Normal.x, raycast.Block.y + raycast.Normal.y, raycast.Block.z + raycast.Normal.z, core.BlockIds["furnace_on"]);
+				WorldSetBlock(&core.world, raycast.Block.x + raycast.Normal.x, raycast.Block.y + raycast.Normal.y, raycast.Block.z + raycast.Normal.z, core.BlockIds["oak_planks"]);
 		}
 
 		if (core.input.Keys[GLFW_KEY_K] == Pressed)

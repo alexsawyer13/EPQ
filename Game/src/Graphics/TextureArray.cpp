@@ -50,7 +50,7 @@ bool TextureArray::AddTexture(const std::string &path)
 		return false;
 	}
 
-	Stb_Image image(path, true);
+	Image image(path, true);
 
 	if (!image.Data)
 	{
@@ -72,7 +72,7 @@ bool TextureArray::AddTexture(const std::string &path)
 	return true;
 }
 
-bool TextureArray::AddTexture(const Stb_Image &image)
+bool TextureArray::AddTexture(const Image &image)
 {
 	if (m_NumTextures == m_MaxTextures)
 	{

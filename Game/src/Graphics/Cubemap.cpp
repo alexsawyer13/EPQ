@@ -25,7 +25,7 @@ void Cubemap::Create(const std::string &top, const std::string &bottom, const st
 
 	for (unsigned int i = 0; i < faces.size(); i++)
 	{
-		Stb_Image image(faces[i], false);
+		Image image(faces[i], false);
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, image.Width, image.Height, 0, GL_RGB, GL_UNSIGNED_BYTE, image.Data);
 	}
 
