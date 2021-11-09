@@ -17,7 +17,7 @@ unsigned int rectangleIndices[] = {
 
 void LoadCoreData()
 {
-	core.block_texarray.Create(T_WIDTH, T_HEIGHT, 100);
+	TexArrayCreate(&core.block_texarray, T_WIDTH, T_HEIGHT, 100);
 
 	LoadGameData();
 

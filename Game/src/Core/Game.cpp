@@ -7,7 +7,6 @@
 #include <Game/World.h>
 #include <Game/Player.h>
 #include <Graphics/Shader.h>
-#include <Graphics/TextureArray.h>
 #include <Graphics/Cubemap.h>
 #include <Graphics/Buffers.h>
 #include <Graphics/BatchRenderer.h>
@@ -282,7 +281,7 @@ void OpenGLRender(int width, int height)
 		core.shaders["optimisedtexarray"].SetMat4("u_Proj", proj);
 		core.shaders["optimisedtexarray"].SetInt("u_Texture", 0);
 
-		core.block_texarray.Bind(0);
+		TexArrayBind(&core.block_texarray, 0);
 
 		auto currentTime = std::chrono::system_clock::now();
 		auto timeSinceLastAnimFrame = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastAnimFrame).count();

@@ -8,7 +8,14 @@ std::string ReadAsset(const std::string &path);
 enum class ImageType
 {
 	STB_IMAGE,
-	RAW_IMAGE
+	RAW_IMAGE,
+};
+
+enum class ImageOwnership
+{
+	COPY,
+	BORROW,
+	KEEP
 };
 
 struct Image
@@ -17,9 +24,10 @@ struct Image
 	int Width, Height, Channels;
 	std::string Path;
 	ImageType Type;
+	ImageOwnership Ownership;
 
 	Image(const std::string &path, bool flipVertically = true);
-	Image(unsigned char *data, int width, int height, int channels, bool owns_data = true);
+	Image(unsigned char *data, int width, int height, int channels, ImageOwnership ownership);
 	~Image();
 };
 

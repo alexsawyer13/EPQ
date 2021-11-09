@@ -12,12 +12,7 @@ struct TexParams
 	GLint WrapT;
 };
 
-TexParams DEFAULT_TEX_PARAMS = {
-	GL_NEAREST,
-	GL_NEAREST,
-	GL_REPEAT,
-	GL_REPEAT
-};
+extern TexParams DEFAULT_TEX_PARAMS;
 
 struct Texture2D
 {

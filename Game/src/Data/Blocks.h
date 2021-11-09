@@ -1,18 +1,8 @@
 #pragma once
 
-#include <Graphics/TextureArray.h>
-#include <Graphics/Shader.h>
-#include <Graphics/Buffers.h>
-#include <Graphics/Cubemap.h>
-#include <Graphics/Texture.h>
-#include <Core/Input.h>
 #include <Physics/AABB.h>
 
-#include <rapidjson/document.h>
-#include <GLFW/glfw3.h>
 #include <string>
-#include <vector>
-#include <unordered_map>
 
 struct Block
 {

@@ -1,9 +1,10 @@
 #include <Data/Blocks.h>
 #include <Core/Assets.h>
-#include <Data/CubeData.h>
 #include <Core/Core.h>
+#include <Graphics/Texture.h>
 
 #include <spdlog/spdlog.h>
+#include <rapidjson/document.h>
 
 #include <unordered_map>
 #include <vector>
@@ -148,7 +149,7 @@ BlockTexture LoadBlockTexture(const std::string &path, unsigned int currentId)
 
 	if (image.Height == T_HEIGHT)
 	{
-		core.block_texarray.AddTexture(image);
+		TexArrayAddImage(&core.block_texarray, &image);
 		texture.AnimationFrames = 1;
 	}
 
@@ -163,8 +164,9 @@ BlockTexture LoadBlockTexture(const std::string &path, unsigned int currentId)
 
 		for (int i = 0; i < num_images; i++)
 		{
-			unsigned char *current_image = image.Data + T_WIDTH * T_HEIGHT * image.Channels * i;
-			core.block_texarray.AddTexture(path, current_image, T_WIDTH, T_HEIGHT, image.Channels);
+			unsigned char *current_image_data = image.Data + T_WIDTH * T_HEIGHT * image.Channels * i;
+			Image current_image(current_image_data, T_WIDTH, T_HEIGHT, image.Channels, ImageOwnership::BORROW);
+			TexArrayAddImage(&core.block_texarray, &current_image);
 		}
 
 		texture.AnimationFrames = num_images;

@@ -2,6 +2,13 @@
 
 #include <spdlog/spdlog.h>
 
+TexParams DEFAULT_TEX_PARAMS = {
+	GL_NEAREST,
+	GL_NEAREST,
+	GL_REPEAT,
+	GL_REPEAT
+};
+
 void Texture2DCreate(Texture2D *texture)
 {
 	glGenTextures(1, &texture->Handle);

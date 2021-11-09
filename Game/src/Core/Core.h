@@ -1,10 +1,11 @@
 #pragma once
 
 #include <Core/Profiler.h>
+#include <Core/Input.h>
 #include <Graphics/Texture.h>
 #include <Graphics/Shader.h>
-#include <Graphics/TextureArray.h>
 #include <Graphics/BatchRenderer.h>
+#include <Graphics/Cubemap.h>
 #include <Game/World.h>
 #include <Game/Player.h>
 #include <Data/Blocks.h>
@@ -36,8 +37,8 @@ struct Core
 	std::unordered_map<std::string, VertexArray> vaos;
 	std::unordered_map<std::string, VertexBuffer> vbos;
 	std::unordered_map<std::string, IndexBuffer> ibos;
-	TextureArray block_texarray;
-	TextureArray item_texarray;
+	TexArray block_texarray;
+	TexArray item_texarray;
 	Cubemap cubemap;
 
 	// Data
