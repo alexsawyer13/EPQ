@@ -25,8 +25,8 @@ void main()
     
     uint texValue = uint(a_TextureValue);
 
-    v_TexCoord = texCoords[texValue % 4];
-    v_Index = uint(texValue / 4);
+    v_TexCoord = texCoords[int(texValue) % 4];
+    v_Index = uint(texValue / 4u);
 
     v_AnimationFrames = uint(a_AnimationFrames);
 }
