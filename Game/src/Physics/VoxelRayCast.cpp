@@ -7,6 +7,13 @@
 
 Raycast VoxelRayCast(World *world, const glm::vec3 &start, const glm::vec3 &dir)
 {
+	// TODO: TEMP BECAUSE OF BUG (avoiding infinite loop)
+	if (std::isnan(start.x) || std::isnan(start.y) || std::isnan(start.z))
+	{
+		spdlog::debug("Player is at infinity again :(");
+		return { false };
+	}
+
 	glm::vec3 stepSize;
 	stepSize.x = sqrt(1 + (dir.y / dir.x) * (dir.y / dir.x) + (dir.z / dir.x) * (dir.z / dir.x));
 	stepSize.y = sqrt(1 + (dir.x / dir.y) * (dir.x / dir.y) + (dir.z / dir.y) * (dir.z / dir.y));
@@ -51,10 +58,9 @@ Raycast VoxelRayCast(World *world, const glm::vec3 &start, const glm::vec3 &dir)
 
 	bool tileFound = false;
 	float distance = 0.0f;
-	float maxDistance = 10.0f;
-	while (!tileFound && distance < maxDistance)
+	float maxDistance = 7.5f;
+	while (!tileFound && distance < maxDistance) // TODO: INFINITE LOOP HERE FIX IT 
 	{
-
 		if (rayLength.x <= rayLength.y && rayLength.x <= rayLength.z)
 		{
 			startInt.x += step.x;

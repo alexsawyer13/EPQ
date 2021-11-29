@@ -21,6 +21,8 @@ public:
 	void SetMat4(const std::string &name, const glm::mat4 &mat);
 	void SetInt(const std::string &name, int val);
 	void SetUnsignedInt(const std::string &name, unsigned int val);
+	void SetFloat(const std::string &name, float val);
+	void SetFloat4(const std::string &name, const glm::vec4 &val);
 
 private:
 	GLuint LoadShader(const std::string &source, GLenum type);

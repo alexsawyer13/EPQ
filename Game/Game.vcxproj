@@ -170,6 +170,7 @@
     <ClCompile Include="src\Graphics\Cubemap.cpp" />
     <ClCompile Include="src\Core\Input.cpp" />
     <ClCompile Include="src\Graphics\Buffers.cpp" />
+    <ClCompile Include="src\Graphics\DebugRender.cpp" />
     <ClCompile Include="src\Graphics\Texture.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Graphics\Shader.cpp" />
@@ -205,6 +206,7 @@
     <ClInclude Include="src\Core\Input.h" />
     <ClInclude Include="src\Graphics\BatchRenderer.h" />
     <ClInclude Include="src\Graphics\Cubemap.h" />
+    <ClInclude Include="src\Graphics\DebugRender.h" />
     <ClInclude Include="src\Graphics\Shader.h" />
     <ClInclude Include="src\Graphics\Texture.h" />
     <ClInclude Include="src\Graphics\Buffers.h" />

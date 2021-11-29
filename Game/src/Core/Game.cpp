@@ -46,6 +46,7 @@ constexpr int crosshair_size = 20.0f;
 
 glm::vec3 default_player_position = glm::vec3(0.0f, 75.0f, 0.0f);
 Raycast frame_raycast;
+glm::vec4 highlight_colour = glm::vec4(1.0f, 1.0f, 1.0f, 0.4f);
 
 bool ImGui_enabled = true;
 
@@ -200,7 +201,7 @@ void Update()
 		PROFILE_SCOPE_US("InputUpdate");
 		InputUpdate();
 	}
-
+	
 	if (core.input.Keys[GLFW_KEY_ESCAPE] == Pressed)
 		InputToggleCursorGrab();
 
@@ -222,19 +223,21 @@ void Update()
 
 	{
 		PROFILE_SCOPE_US("Raycasting");
-		frame_raycast = VoxelRayCast(&core.world, core.player.Position, core.player.Direction);
+		frame_raycast = VoxelRayCast(&core.world, core.player.Position + s_PlayerEyeOffset, core.player.Direction);
 
 		if (frame_raycast.Hit)
 		{
-			if (core.input.Keys[GLFW_MOUSE_BUTTON_LEFT] == Pressed)
+			if (core.input.IsMouseCaptured && core.input.Keys[GLFW_MOUSE_BUTTON_LEFT] == Pressed)
 				WorldBreakBlock(&core.world, frame_raycast.Block.x, frame_raycast.Block.y, frame_raycast.Block.z);
-			if (core.input.Keys[GLFW_MOUSE_BUTTON_RIGHT] == Pressed)
+			if (core.input.IsMouseCaptured && core.input.Keys[GLFW_MOUSE_BUTTON_RIGHT] == Pressed)
 				WorldSetBlock(&core.world, frame_raycast.Block.x + frame_raycast.Normal.x, frame_raycast.Block.y + frame_raycast.Normal.y, frame_raycast.Block.z + frame_raycast.Normal.z, core.BlockIds["oak_planks"]);
 		}
 	}
 
-		if (core.input.Keys[GLFW_KEY_K] == Pressed)
+		if (core.input.IsMouseCaptured && core.input.Keys[GLFW_KEY_K] == Pressed)
 			core.player.EnableFlight = !core.player.EnableFlight;
+		if (core.input.IsMouseCaptured && core.input.Keys[GLFW_KEY_N] == Pressed)
+			core.player.EnableFlight = !core.player.EnableNoclip;
 
 	// Csv stuff
 
@@ -307,6 +310,7 @@ void OpenGLRender(int width, int height)
 			core.shaders["highlight"].Bind();
 			core.shaders["highlight"].SetMat4("u_View", view);
 			core.shaders["highlight"].SetMat4("u_Proj", proj);
+			core.shaders["highlight"].SetFloat4("u_Colour", highlight_colour);
 
 			glm::vec3 low(0.0f);
 			glm::vec3 axis1(0.0f), axis2(0.0f);
@@ -396,9 +400,9 @@ void ImGuiRender()
 	ImGui::End();
 
 	ImGui::Begin("Debug");
-
 	ImGui::SliderFloat("Speed", &core.player.BaseSpeed, 0.0f, 25.0f, nullptr, 0);
 	ImGui::SliderInt("Animation delay (ms)", &animDelayInt, 1, 1000, nullptr);
+	ImGui::ColorPicker4("Highlight colour", &highlight_colour[0]);
 	ImGui::End();
 
 	ImGui::Begin("Performance");

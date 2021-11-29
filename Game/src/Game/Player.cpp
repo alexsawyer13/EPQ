@@ -17,6 +17,9 @@ constexpr float s_PlayerWidth = 0.8f;
 constexpr float s_PlayerHeight = 1.8f;
 constexpr float s_ForeheadSize = s_PlayerHeight - s_EyeLevel;
 
+constexpr glm::vec3 s_PlayerSize(0.8f, 1.8f, 0.8f);
+const glm::vec3 s_PlayerEyeOffset(0.4f, 1.4f, 0.4f);
+
 constexpr int s_PlayerWidthMaxBlocks = 2; // Ceil(s_PlayerWidth + 1)
 constexpr int s_PlayerHeightMaxBlocks = 3; // Ceil(s_PlayerHeight + 1)
 
@@ -93,18 +96,6 @@ void PlayerGetInput(Player *player)
 		else
 			player->Velocity = glm::normalize(direction);
 
-		//if (player->EnableFlight)
-		//{
-		//	if (state.Input.Keys[GLFW_KEY_SPACE] & Down)
-		//		direction += s_WorldUp;
-		//	if (state.Input.Keys[GLFW_KEY_LEFT_SHIFT] & Down)
-		//		direction -= s_WorldUp;
-		//}
-		//else
-		//{
-		//	direction -= s_WorldUp;
-		//}
-
 		// Handles flight
 		if (player->EnableFlight)
 		{
@@ -117,11 +108,6 @@ void PlayerGetInput(Player *player)
 		{
 			player->Velocity += s_Gravity;
 		}
-
-		//if (!(direction.x == 0.0f && direction.y == 0.0f && direction.z == 0.0f))
-		//{
-		//	player->Position += glm::normalize(direction) * (float)state.Input.DeltaTime * player->Speed;
-		//}
 
 		// Rotation
 		player->Yaw += core.input.DeltaX * player->Sensitivity * s_SensitivityModifier;
@@ -137,79 +123,78 @@ void PlayerUpdatePhysics(Player *player, World *world)
 	// Collisions dont' work at 0,0,0????
 
 	// Calculate the players new position after the update
-	//glm::vec3 actualVelocity = player->Velocity * (float)state.Input.DeltaTime * player->Speed;
 	glm::vec3 deltaPosition = player->Velocity * (float)core.input.DeltaTime * player->Speed;
-	glm::vec3 newPosition = player->Position + deltaPosition;
 
-	// Make a list of all blocks that the player could collide with
-	// TODO: Include the blocks on the way to the new point (not really necessary)
-	std::vector<AABB> aabbs;
-
-	for (int x = -2; x < s_PlayerWidthMaxBlocks + 2; x++)
+	if (!player->EnableNoclip)
 	{
-		for (int z = -2; z < s_PlayerWidthMaxBlocks + 2; z++)
-		{
-			for (int y = -2; y < s_PlayerHeightMaxBlocks + 2; y++)
-			{
-				ivec3 block;
-				block.x = RoundToLowest(player->Position.x) + x;
-				block.y = RoundToLowest(player->Position.y) + y;
-				block.z = RoundToLowest(player->Position.z) + z;
-				Collider collider = WorldGetBlock(world, block.x, block.y, block.z).Collider;
+		glm::vec3 newPosition = player->Position + deltaPosition;
 
-				AABB blockBox;
-				switch (collider)
+		// Make a list of all blocks that the player could collide with
+		// TODO: Include the blocks on the way to the new point (not really necessary)
+		std::vector<AABB> aabbs;
+
+		for (int x = -2; x < s_PlayerWidthMaxBlocks + 2; x++)
+		{
+			for (int z = -2; z < s_PlayerWidthMaxBlocks + 2; z++)
+			{
+				for (int y = -2; y < s_PlayerHeightMaxBlocks + 2; y++)
 				{
-				case Collider::Block:
-				{
-					blockBox.Position = {
-						float(block.x),
-						float(block.y),
-						float(block.z)
-					};
-					blockBox.Size = glm::vec3(1.0f);
-					aabbs.push_back(blockBox);
-					break;
-				}
-				case Collider::None:
-				default:
-					break;
+					ivec3 block;
+					block.x = RoundToLowest(player->Position.x) + x;
+					block.y = RoundToLowest(player->Position.y) + y;
+					block.z = RoundToLowest(player->Position.z) + z;
+					Collider collider = WorldGetBlock(world, block.x, block.y, block.z).Collider;
+
+					AABB blockBox;
+					switch (collider)
+					{
+					case Collider::Block:
+					{
+						blockBox.Position = {
+							float(block.x),
+							float(block.y),
+							float(block.z)
+						};
+						blockBox.Size = glm::vec3(1.0f);
+						blockBox.Position -= s_PlayerEyeOffset;
+						blockBox.Size += s_PlayerSize;
+						aabbs.push_back(blockBox);
+						break;
+					}
+					case Collider::None:
+					default:
+						break;
+					}
 				}
 			}
 		}
-	}
 
-	std::vector<std::pair<int, Collision>> collisions; // Int = index in aabbs vector
+		std::vector<std::pair<int, Collision>> collisions; // Int = index in aabbs vector
 
-	// Calculate the collision for each AABB
-	for (int i = 0; i < aabbs.size(); i++)
-	{
-		Collision collision = RayVsAABB(player->Position, deltaPosition, aabbs[i]);
-		if (collision.Collided && collision.TimeToHit <= 1.0f)
+		// Calculate the collision for each AABB
+		for (int i = 0; i < aabbs.size(); i++)
 		{
-			collisions.push_back({ i, collision }); // Push collisions that need to be resolved to the vector
+			Collision collision = RayVsAABB(player->Position, deltaPosition, aabbs[i]);
+			if (collision.Collided && collision.TimeToHit <= 1.0f)
+			{
+				collisions.push_back({ i, collision }); // Push collisions that need to be resolved to the vector
+			}
 		}
-	}
 
-	//spdlog::debug("There have been {} collisions this frame", collisions.size());
+		spdlog::debug("There have been {} collisions this frame", collisions.size());
 
-	// Sort collisions from closest TimeToHit to furthest
-	std::sort(collisions.begin(), collisions.end(), [](const std::pair<int, Collision> &lhs, const std::pair<int, Collision> &rhs) -> bool
-	{
-		return lhs.second.TimeToHit < rhs.second.TimeToHit;
-	});
+		// Sort collisions from closest TimeToHit to furthest
+		std::sort(collisions.begin(), collisions.end(), [](const std::pair<int, Collision> &lhs, const std::pair<int, Collision> &rhs) -> bool
+			{
+				return lhs.second.TimeToHit < rhs.second.TimeToHit;
+			});
 
-	// Resolve collisions closest to furthest
-	//spdlog::debug("Frame");
-	for (int i = 0; i < collisions.size(); i++)
-	{
-		Collision &collision = collisions[i].second;
-		//spdlog::debug("Collision {} {} {}", collision.Normal.x, collision.Normal.y, collision.Normal.z);
-		//deltaPosition += collision.Normal * glm::vec3(abs(deltaPosition.x), abs(deltaPosition.y), abs(deltaPosition.z)) * (1 - collision.TimeToHit);
-		//deltaPosition = glm::vec3(0.0f);
-		//spdlog::debug("({}, {}, {}), ({}, {}, {}), {}", collision.Point.x, collision.Point.y, collision.Point.z, collision.Normal.x, collision.Normal.y, collision.Normal.z, collision.TimeToHit);
-		deltaPosition -= collision.Normal * glm::dot(deltaPosition, collision.Normal) * (1 - collision.TimeToHit);
-		//spdlog::debug("({}, {}, {})", collision.Tmin.x, collision.Tmin.y, collision.Tmin.z);
+		// Resolve collisions closest to furthest
+		for (int i = 0; i < collisions.size(); i++)
+		{
+			Collision &collision = collisions[i].second;
+			deltaPosition -= collision.Normal * glm::dot(deltaPosition, collision.Normal) * (1 - collision.TimeToHit);
+		}
 	}
 
 	player->Position += deltaPosition;
@@ -217,6 +202,8 @@ void PlayerUpdatePhysics(Player *player, World *world)
 
 void PlayerCalculateView(Player *player)
 {
+	glm::vec3 position = player->Position + s_PlayerEyeOffset;
+
 	// Clamp pitch
 	if (player->Pitch >= 89.9f)
 		player->Pitch = 89.9f;
@@ -238,5 +225,5 @@ void PlayerCalculateView(Player *player)
 	player->Right = glm::cross(player->Direction, s_WorldUp);
 	player->Up = glm::cross(player->Right, s_WorldUp);
 
-	player->View = glm::lookAt(player->Position, player->Position + player->Direction, s_WorldUp);
+	player->View = glm::lookAt(position, position + player->Direction, s_WorldUp);
 }

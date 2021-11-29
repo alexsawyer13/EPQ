@@ -132,3 +132,13 @@ void Shader::SetUnsignedInt(const std::string &name, unsigned int val)
 {
 	glUniform1ui(GetUniformLocation(name), val);
 }
+
+void Shader::SetFloat(const std::string &name, float val)
+{
+	glUniform1f(GetUniformLocation(name), val);
+}
+
+void Shader::SetFloat4(const std::string &name, const glm::vec4 &val)
+{
+	glUniform4f(GetUniformLocation(name), val[0], val[1], val[2], val[3]);
+}

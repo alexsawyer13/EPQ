@@ -4,6 +4,8 @@
 
 #include <glm/glm.hpp>
 
+extern const glm::vec3 s_PlayerEyeOffset;
+
 struct Player
 {
 	glm::vec3 Position;
