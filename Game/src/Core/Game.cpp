@@ -11,6 +11,7 @@
 #include <Graphics/Buffers.h>
 #include <Graphics/BatchRenderer.h>
 #include <Physics/VoxelRayCast.h>
+#include <Maths/Maths.h>
 
 #include <spdlog/spdlog.h>
 #include <stb/stb_image.h>
@@ -44,6 +45,7 @@ long long animDelay = 100.0f;
 constexpr int crosshair_size = 20.0f;
 
 glm::vec3 default_player_position = glm::vec3(0.0f, 75.0f, 0.0f);
+Raycast frame_raycast;
 
 bool ImGui_enabled = true;
 
@@ -220,24 +222,19 @@ void Update()
 
 	{
 		PROFILE_SCOPE_US("Raycasting");
+		frame_raycast = VoxelRayCast(&core.world, core.player.Position, core.player.Direction);
 
-		if (core.input.Keys[GLFW_MOUSE_BUTTON_LEFT] == Pressed)
+		if (frame_raycast.Hit)
 		{
-			Raycast raycast = VoxelRayCast(&core.world, core.player.Position, core.player.Direction);
-			if (raycast.Hit)
-				WorldBreakBlock(&core.world, raycast.Block.x, raycast.Block.y, raycast.Block.z);
+			if (core.input.Keys[GLFW_MOUSE_BUTTON_LEFT] == Pressed)
+				WorldBreakBlock(&core.world, frame_raycast.Block.x, frame_raycast.Block.y, frame_raycast.Block.z);
+			if (core.input.Keys[GLFW_MOUSE_BUTTON_RIGHT] == Pressed)
+				WorldSetBlock(&core.world, frame_raycast.Block.x + frame_raycast.Normal.x, frame_raycast.Block.y + frame_raycast.Normal.y, frame_raycast.Block.z + frame_raycast.Normal.z, core.BlockIds["oak_planks"]);
 		}
-
-		if (core.input.Keys[GLFW_MOUSE_BUTTON_RIGHT] == Pressed)
-		{
-			Raycast raycast = VoxelRayCast(&core.world, core.player.Position, core.player.Direction);
-			if (raycast.Hit)
-				WorldSetBlock(&core.world, raycast.Block.x + raycast.Normal.x, raycast.Block.y + raycast.Normal.y, raycast.Block.z + raycast.Normal.z, core.BlockIds["oak_planks"]);
-		}
+	}
 
 		if (core.input.Keys[GLFW_KEY_K] == Pressed)
 			core.player.EnableFlight = !core.player.EnableFlight;
-	}
 
 	// Csv stuff
 
@@ -303,6 +300,49 @@ void OpenGLRender(int width, int height)
 		PROFILE_SCOPE_US("DrawUI");
 
 		glEnable(GL_BLEND);
+
+		// Highlighted block
+		if (frame_raycast.Hit)
+		{
+			core.shaders["highlight"].Bind();
+			core.shaders["highlight"].SetMat4("u_View", view);
+			core.shaders["highlight"].SetMat4("u_Proj", proj);
+
+			glm::vec3 low(0.0f);
+			glm::vec3 axis1(0.0f), axis2(0.0f);
+			bool axis = false;
+
+			for (int i = 0; i < 3; i++)
+			{
+				if (frame_raycast.Normal[i] == 0.0f)
+				{
+					if (axis)
+					{
+						axis2[i] = 1.0f;
+					}
+					else
+					{
+						axis1[i] = 1.0f;
+						axis = true;
+					}
+					low[i] = RoundToLowest(frame_raycast.Location[i]);
+				}
+				else
+				{
+					low[i] = std::roundf(frame_raycast.Location[i]);
+				}
+			}
+
+			glm::vec3 vertices[4];
+
+			vertices[0] = low + 0.01f * frame_raycast.Normal;
+			vertices[1] = low + axis1 + 0.001f * frame_raycast.Normal;
+			vertices[2] = low + axis2 + 0.001f * frame_raycast.Normal;
+			vertices[3] = low + axis1 + axis2 + 0.001f * frame_raycast.Normal;
+
+			VboSubData(&core.vbos["highlight"], 0, 12 * sizeof(float), vertices);
+			VaoDraw(&core.vaos["highlight"]);
+		}
 
 		core.shaders["batch"].Bind();
 		core.shaders["batch"].SetMat4("u_Proj", ortho);

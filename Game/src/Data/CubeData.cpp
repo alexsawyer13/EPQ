@@ -78,4 +78,9 @@ namespace CubeData
 		-1.0f, -1.0f,  1.0f,
 		 1.0f, -1.0f,  1.0f
 	};
+
+	unsigned int RectangleIndices[] = {
+		0, 1, 2,
+		2, 1, 3,
+	};
 }

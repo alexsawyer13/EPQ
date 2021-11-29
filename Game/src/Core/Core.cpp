@@ -30,6 +30,8 @@ void LoadCoreData()
 	core.shaders["texture"].Create("texture.vert", "texture.frag");
 	core.shaders["batch"] = Shader();
 	core.shaders["batch"].Create("batch.vert", "batch.frag");
+	core.shaders["highlight"] = Shader();
+	core.shaders["highlight"].Create("highlight_shader.vert", "highlight_shader.frag");
 
 	// Load cubemap
 	core.vaos["cubemap"] = {};
@@ -72,6 +74,18 @@ void LoadCoreData()
 	Texture2DCreate(&core.textures["hotbar_icon"]);
 	Image image2("textures/hotbar_icon_piskel.png", true);
 	Texture2DSetData(&core.textures["hotbar_icon"], &image2);
+
+	//// Load rectangle for highlighting block faces
+	core.vaos["highlight"] = {};
+	VaoCreate(&core.vaos["highlight"]);
+	core.vbos["highlight"] = {};
+	VboCreate(&core.vbos["highlight"]);
+	VboData(&core.vbos["highlight"], 12 * sizeof(float), nullptr, GL_DYNAMIC_DRAW);
+	core.ibos["highlight"] = {};
+	IboCreate(&core.ibos["highlight"]);
+	IboData(&core.ibos["highlight"], 6 * sizeof(unsigned int), CubeData::RectangleIndices, GL_STATIC_DRAW);
+	VaoAddVbo(&core.vaos["highlight"], &core.vbos["highlight"], { {3, GL_FLOAT} });
+	VaoSetIbo(&core.vaos["highlight"], &core.ibos["highlight"]);
 
 	// Load objects
 	WorldCreate(&core.world);

@@ -216,5 +216,7 @@
     <None Include="assets\shaders\optimisedtexarray.vert" />
     <None Include="assets\shaders\batch.vert" />
     <None Include="assets\shaders\batch.frag" />
+    <None Include="assets\shaders\highlight_shader.vert" />
+    <None Include="assets\shaders\highlight_shader.frag" />
   </ItemGroup>
 </Project>

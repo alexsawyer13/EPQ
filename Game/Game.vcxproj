@@ -230,6 +230,8 @@
     <None Include="assets\shaders\cubemap.vert" />
     <None Include="assets\shaders\default.frag" />
     <None Include="assets\shaders\default.vert" />
+    <None Include="assets\shaders\highlight_shader.frag" />
+    <None Include="assets\shaders\highlight_shader.vert" />
     <None Include="assets\shaders\optimisedtexarray.frag" />
     <None Include="assets\shaders\optimisedtexarray.vert" />
     <None Include="assets\shaders\texture.frag" />

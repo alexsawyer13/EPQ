@@ -8,4 +8,5 @@ namespace CubeData
 	extern glm::vec3 Normals[6];
 	extern unsigned int Faces[24];
 	extern float CubeVertices[108];
+	extern unsigned int RectangleIndices[6];
 }
