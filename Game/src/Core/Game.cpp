@@ -237,7 +237,7 @@ void Update()
 		if (core.input.IsMouseCaptured && core.input.Keys[GLFW_KEY_K] == Pressed)
 			core.player.EnableFlight = !core.player.EnableFlight;
 		if (core.input.IsMouseCaptured && core.input.Keys[GLFW_KEY_N] == Pressed)
-			core.player.EnableFlight = !core.player.EnableNoclip;
+			core.player.EnableNoclip = !core.player.EnableNoclip;
 
 	// Csv stuff
 
