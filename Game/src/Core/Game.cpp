@@ -213,6 +213,11 @@ void Update()
 	{
 		PROFILE_SCOPE_US("PlayerUpdate");
 		PlayerUpdate(&core.player, &core.world);
+		
+		if (core.player.HasChangedBlock)
+			spdlog::debug("Changed block");
+		if (core.player.HasChangedChunk)
+			spdlog::debug("Changed chunk");
 	}
 	{
 		PROFILE_SCOPE_US("WorldUpdate");

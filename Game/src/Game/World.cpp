@@ -35,6 +35,11 @@ void WorldDestroy(World *world)
 
 }
 
+void WorldUpdate(World *world)
+{
+
+}
+
 void WorldDrawChunks(World *world)
 {
 	for (auto iter = world->ActiveChunks.begin(); iter != world->ActiveChunks.end(); ++iter)
@@ -210,12 +215,23 @@ void WorldBreakBlock(World *world, int x, int y, int z)
 
 void WorldUpdate(World *world)
 {
+	// Generate a chunk if any are waiting to be generated
 	if (world->PendingMesh.size() > 0)
 	{
 		Chunk &chunk = world->Chunks[world->PendingMesh.front()];
 		world->PendingMesh.pop_front();
 
 		ChunkBuildMesh(&chunk);
+	}
+	
+	if (core.player.HasChangedChunk)
+	{
+		int oldChunkX = RoundToLowest((float)core.player.OldPosition.x / CHUNK_WIDTH);
+		int oldChunkZ = RoundToLowest((float)core.player.OldPosition.z / CHUNK_WIDTH);
+		int chunkX = RoundToLowest((float)core.player.Position.x / CHUNK_WIDTH);
+		int chunkZ = RoundToLowest((float)core.player.Position.z / CHUNK_WIDTH);
+		int deltaX = chunkX - oldChunkX;
+		int deltaZ = chunkZ - oldChunkZ;
 	}
 }
 

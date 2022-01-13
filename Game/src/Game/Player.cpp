@@ -18,7 +18,7 @@ constexpr float s_PlayerHeight = 1.8f;
 constexpr float s_ForeheadSize = s_PlayerHeight - s_EyeLevel;
 
 constexpr glm::vec3 s_PlayerSize(0.8f, 1.8f, 0.8f);
-const glm::vec3 s_PlayerEyeOffset(0.4f, 1.4f, 0.4f);
+const glm::vec3 s_PlayerEyeOffset(0.4f, 1.6f, 4.0f);
 
 constexpr int s_PlayerWidthMaxBlocks = 2; // Ceil(s_PlayerWidth + 1)
 constexpr int s_PlayerHeightMaxBlocks = 3; // Ceil(s_PlayerHeight + 1)
@@ -26,6 +26,7 @@ constexpr int s_PlayerHeightMaxBlocks = 3; // Ceil(s_PlayerHeight + 1)
 void PlayerCreate(Player *player, float speed, float sensitivity)
 {
 	player->Position = glm::vec3(0.0f); // Position of eye level
+	player->OldPosition = player->Position;
 	player->Velocity = glm::vec3(0.0f);
 	player->Pitch = 0.0f;
 	player->Yaw = 0.0f;
@@ -35,6 +36,9 @@ void PlayerCreate(Player *player, float speed, float sensitivity)
 
 	player->EnableFlight = false;
 	player->EnableNoclip = false;
+
+	player->HasChangedBlock = false;
+	player->HasChangedChunk = false;
 
 	PlayerCalculateView(player);
 }
@@ -181,7 +185,7 @@ void PlayerUpdatePhysics(Player *player, World *world)
 			}
 		}
 
-		spdlog::debug("There have been {} collisions this frame", collisions.size());
+		//spdlog::debug("There have been {} collisions this frame", collisions.size());
 
 		// Sort collisions from closest TimeToHit to furthest
 		std::sort(collisions.begin(), collisions.end(), [](const std::pair<int, Collision> &lhs, const std::pair<int, Collision> &rhs) -> bool
@@ -197,7 +201,33 @@ void PlayerUpdatePhysics(Player *player, World *world)
 		}
 	}
 
+	player->OldPosition = player->Position;
 	player->Position += deltaPosition;
+
+	if (RoundToLowest(player->OldPosition.x) != RoundToLowest(player->Position.x) ||
+		RoundToLowest(player->OldPosition.y) != RoundToLowest(player->Position.y) ||
+		RoundToLowest(player->OldPosition.z) != RoundToLowest(player->Position.z))
+	{
+		player->HasChangedBlock = true;
+	}
+	else
+	{
+		player->HasChangedBlock = false;
+	}
+
+	int oldChunkX = RoundToLowest((float)player->OldPosition.x / CHUNK_WIDTH);
+	int oldChunkZ = RoundToLowest((float)player->OldPosition.z / CHUNK_WIDTH);
+	int chunkX = RoundToLowest((float)player->Position.x / CHUNK_WIDTH);
+	int chunkZ = RoundToLowest((float)player->Position.z / CHUNK_WIDTH);
+
+	if (oldChunkX != chunkX || oldChunkZ != chunkZ)
+	{
+		player->HasChangedChunk = true;
+	}
+	else
+	{
+		player->HasChangedChunk = false;
+	}
 }
 
 void PlayerCalculateView(Player *player)

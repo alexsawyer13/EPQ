@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Game/World.h>
+#include <Maths/Types.h>
 
 #include <glm/glm.hpp>
 
@@ -8,7 +9,7 @@ extern const glm::vec3 s_PlayerEyeOffset;
 
 struct Player
 {
-	glm::vec3 Position;
+	glm::vec3 Position, OldPosition;
 	glm::vec3 Velocity;
 	bool EnableFlight, EnableNoclip;
 
@@ -16,6 +17,9 @@ struct Player
 	float BaseSpeed, Speed, Sensitivity;
 	glm::vec3 Direction, Right, Up;
 	glm::mat4 View;
+
+	bool HasChangedBlock;
+	bool HasChangedChunk;
 };
 
 void PlayerCreate(Player *player, float speed, float sensitivity);

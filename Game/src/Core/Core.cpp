@@ -75,7 +75,7 @@ void LoadCoreData()
 	Image image2("textures/hotbar_icon_piskel.png", true);
 	Texture2DSetData(&core.textures["hotbar_icon"], &image2);
 
-	//// Load rectangle for highlighting block faces
+	// Load rectangle for highlighting block faces
 	core.vaos["highlight"] = {};
 	VaoCreate(&core.vaos["highlight"]);
 	core.vbos["highlight"] = {};
