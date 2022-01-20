@@ -9,13 +9,13 @@
 #include <thread>
 #include <optional>
 
-constexpr int RENDERDISTANCE = 8;
+constexpr int RENDERDISTANCE = 1;
 
 #define CHUNK_HASH(x, z) ((((uint64_t)(x)) << 32) + ((uint64_t)(z)))
 
 struct World
 {
-	std::vector<Chunk> Chunks;
+	std::vector<Chunk> Chunks; // TODO: CAN'T USE POINTERS TO CHUNKS BECAUSE CHUNKS ARE IN A VECTOR WHOOPS
 
 	std::unordered_map<uint64_t, int> ActiveChunks;
 	std::unordered_map<uint64_t, int> InactiveChunks;

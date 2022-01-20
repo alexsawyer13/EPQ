@@ -45,6 +45,9 @@ void PlayerCreate(Player *player, float speed, float sensitivity)
 
 void PlayerUpdate(Player *player, World *world)
 {
+	player->HasChangedBlock = false;
+	player->HasChangedChunk = false;
+
 	if (core.input.Keys[GLFW_KEY_LEFT_CONTROL] == Down)
 	{
 		core.player.Speed = 10 * core.player.BaseSpeed;
@@ -210,10 +213,6 @@ void PlayerUpdatePhysics(Player *player, World *world)
 	{
 		player->HasChangedBlock = true;
 	}
-	else
-	{
-		player->HasChangedBlock = false;
-	}
 
 	int oldChunkX = RoundToLowest((float)player->OldPosition.x / CHUNK_WIDTH);
 	int oldChunkZ = RoundToLowest((float)player->OldPosition.z / CHUNK_WIDTH);
@@ -223,10 +222,6 @@ void PlayerUpdatePhysics(Player *player, World *world)
 	if (oldChunkX != chunkX || oldChunkZ != chunkZ)
 	{
 		player->HasChangedChunk = true;
-	}
-	else
-	{
-		player->HasChangedChunk = false;
 	}
 }
 

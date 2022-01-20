@@ -3,8 +3,10 @@
 layout (location = 0) in vec3 a_Pos;
 layout (location = 1) in float a_TextureValue; // 0 1 2 3 are the corners of texture array index 0, 4 5 6 7 are the corners of texture array index 1, etc.
 layout (location = 2) in float a_AnimationFrames;
+layout (location = 3) in float a_Shading;
 
 out vec2 v_TexCoord;
+out float v_Shading;
 flat out uint v_Index;
 flat out uint v_AnimationFrames;
 
@@ -29,4 +31,5 @@ void main()
     v_Index = uint(texValue / 4u);
 
     v_AnimationFrames = uint(a_AnimationFrames);
+    v_Shading = a_Shading;
 }

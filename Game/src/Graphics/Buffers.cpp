@@ -114,6 +114,10 @@ void VaoSetIbo(VertexArray *vao, IndexBuffer *ibo)
 void VaoDraw(VertexArray *vao)
 {
 	VaoBind(vao);
+	if (vao->Ibo->Count < 0)
+	{
+		spdlog::debug("UH OH");
+	}
 	glDrawElements(GL_TRIANGLES, vao->Ibo->Count, GL_UNSIGNED_INT, 0);
 }
 

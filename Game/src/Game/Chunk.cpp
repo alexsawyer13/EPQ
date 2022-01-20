@@ -9,12 +9,17 @@
 void ChunkCreate(Chunk *chunk, int x, int z)
 {
 	PROFILE_SCOPE_US("ChunkCreate");
+	spdlog::debug("ChunkCreate");
 
 	chunk->X = x;
 	chunk->Z = z;
 	chunk->Model = glm::translate(glm::mat4(1.0f), glm::vec3(x * CHUNK_WIDTH, 0, z * CHUNK_WIDTH));
 
 	chunk->Data = new uint16_t[CHUNK_VOLUME];
+	chunk->Posx = nullptr;
+	chunk->Negx = nullptr;
+	chunk->Posz = nullptr;
+	chunk->Negz = nullptr;
 
 	uint16_t grass = BLOCK_PACK(core.BlockIds["grass"], 0);
 	uint16_t dirt = BLOCK_PACK(core.BlockIds["dirt"], 0);
@@ -73,6 +78,7 @@ void ChunkSetNeighbours(Chunk *chunk, Chunk *px, Chunk *nx, Chunk *pz, Chunk *nz
 void ChunkBuildMesh(Chunk *chunk)
 {
 	PROFILE_SCOPE_US("ChunkBuildMesh");
+	spdlog::debug("ChunkBuildMesh");
 
 	std::vector<float> data;
 	std::vector<unsigned int> indices;
@@ -155,6 +161,19 @@ void ChunkBuildMesh(Chunk *chunk)
 								data.push_back(block.Faces[i] * 4 + j);
 								// Add the number of animation frames
 								data.push_back((float)(texture.AnimationFrames));
+								// Add shading depending on direction
+								if (CubeData::Normals[i].x == 0.0f && CubeData::Normals[i].y == 0.0f)
+								{
+									data.push_back(0.8f);
+								}
+								else if (CubeData::Normals[i].z == 0.0f && CubeData::Normals[i].y == 0.0f)
+								{
+									data.push_back(0.9f);
+								}
+								else if (CubeData::Normals[i].x == 0.0f && CubeData::Normals[i].z == 0.0f)
+								{
+									data.push_back(1.0f);
+								}
 							}
 							// Add the indices for both of the triangles
 							indices.push_back(currentIndex);
@@ -175,7 +194,7 @@ void ChunkBuildMesh(Chunk *chunk)
 	// Creates the OpenGL objects
 	VboData(&chunk->Vbo, data.size() * sizeof(float), data.data(), GL_STATIC_DRAW);
 	IboData(&chunk->Ibo, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
-	VaoAddVbo(&chunk->Vao, &chunk->Vbo, { { 3, GL_FLOAT }, { 1, GL_FLOAT }, {1, GL_FLOAT} });
+	VaoAddVbo(&chunk->Vao, &chunk->Vbo, { { 3, GL_FLOAT }, { 1, GL_FLOAT }, {1, GL_FLOAT}, {1, GL_FLOAT} });
 	VaoSetIbo(&chunk->Vao, &chunk->Ibo);
 
 	chunk->Visible = true;

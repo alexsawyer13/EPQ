@@ -1,6 +1,7 @@
 #version 330 core
 
 in vec2 v_TexCoord;
+in float v_Shading;
 flat in uint v_Index;
 flat in uint v_AnimationFrames;
 
@@ -13,5 +14,5 @@ uniform uint u_CurrentAnimationFrame;
 void main()
 {
 	uint frame = u_CurrentAnimationFrame % v_AnimationFrames; // 0 to v_AnimationFrames - 1
-	o_FragColour = texture(u_Texture, vec3(v_TexCoord, v_Index + frame));
+	o_FragColour = texture(u_Texture, vec3(v_TexCoord, v_Index + frame)) * v_Shading;
 }

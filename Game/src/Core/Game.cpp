@@ -405,6 +405,12 @@ void ImGuiRender()
 	ImGui::End();
 
 	ImGui::Begin("Debug");
+	ImGui::Text("Chunks: %d", core.world.Chunks.size());
+	ImGui::Text("Active chunks: %d", core.world.ActiveChunks.size());
+	ImGui::Text("Inactive chunks: %d", core.world.InactiveChunks.size());
+	ImGui::End();
+
+	ImGui::Begin("Configuration");
 	ImGui::SliderFloat("Speed", &core.player.BaseSpeed, 0.0f, 25.0f, nullptr, 0);
 	ImGui::SliderInt("Animation delay (ms)", &animDelayInt, 1, 1000, nullptr);
 	ImGui::ColorPicker4("Highlight colour", &highlight_colour[0]);

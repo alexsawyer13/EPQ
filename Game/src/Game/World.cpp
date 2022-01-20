@@ -5,8 +5,12 @@
 
 #include <spdlog/spdlog.h>
 
+void WorldLoadChunk(World *world, int x, int z);
+
 void WorldCreate(World *world)
 {
+	world->Chunks.reserve(1000); // TODO: TEMPORARY FIX
+
 	for (int x = -RENDERDISTANCE; x <= RENDERDISTANCE; x++)
 	{
 		for (int z = -RENDERDISTANCE; z <= RENDERDISTANCE; z++)
@@ -21,21 +25,16 @@ void WorldCreate(World *world)
 	for (int i = 0; i < world->Chunks.size(); i++)
 	{
 		Chunk &chunk = world->Chunks[i];
-		Chunk *posx = WorldGetChunk(world, chunk.X + 1, chunk.Z);
-		Chunk *negx = WorldGetChunk(world, chunk.X - 1, chunk.Z);
-		Chunk *posz = WorldGetChunk(world, chunk.X, chunk.Z + 1);
-		Chunk *negz = WorldGetChunk(world, chunk.X, chunk.Z - 1);
-		ChunkSetNeighbours(&chunk, posx, negx, posz, negz);
+		//Chunk *posx = WorldGetChunk(world, chunk.X + 1, chunk.Z);
+		//Chunk *negx = WorldGetChunk(world, chunk.X - 1, chunk.Z);
+		//Chunk *posz = WorldGetChunk(world, chunk.X, chunk.Z + 1);
+		//Chunk *negz = WorldGetChunk(world, chunk.X, chunk.Z - 1);
+		//ChunkSetNeighbours(&chunk, posx, negx, posz, negz); TODO: FIX
 		world->PendingMesh.push_back(i);
 	}
 }
 
 void WorldDestroy(World *world)
-{
-
-}
-
-void WorldUpdate(World *world)
 {
 
 }
@@ -74,7 +73,7 @@ Block &WorldGetBlock(World *world, int x, int y, int z)
 {
 	if (y > CHUNK_HEIGHT - 1 || y < 0)
 	{
-		spdlog::error("Trying to access block that is above or below world, returning block id 0");
+		//spdlog::error("Trying to access block that is above or below world, returning block id 0"); TODO: BETTER ERRORS
 		return core.Blocks[0];
 	}
 
@@ -87,7 +86,7 @@ Block &WorldGetBlock(World *world, int x, int y, int z)
 	auto iter = world->ActiveChunks.find(CHUNK_HASH(chunkX, chunkZ));
 	if (iter == world->ActiveChunks.end()) // Block isn't in active chunk
 	{
-		spdlog::error("Trying to access block that is outside of active chunks, returning block id 0");
+		//spdlog::error("Trying to access block that is outside of active chunks, returning block id 0"); TODO: BETTER ERRORS
 		return core.Blocks[0];
 	}
 
@@ -232,7 +231,53 @@ void WorldUpdate(World *world)
 		int chunkZ = RoundToLowest((float)core.player.Position.z / CHUNK_WIDTH);
 		int deltaX = chunkX - oldChunkX;
 		int deltaZ = chunkZ - oldChunkZ;
+
+		spdlog::debug("Old chunk ({}, {}) New chunk ({}, {})", oldChunkX, oldChunkZ, chunkX, chunkZ);
+
+		int newRowX = chunkX + deltaX;
+		int newRowZ = chunkZ + deltaZ;
+
+		// Load X row
+		for (int z = chunkZ - RENDERDISTANCE; z <= chunkZ + RENDERDISTANCE; z++)
+		{
+			WorldLoadChunk(world, chunkX + RENDERDISTANCE * (deltaX>0)*2-1, z);
+		}
+
+		// Load Z row
+		for (int x = chunkX - RENDERDISTANCE; x <= chunkX + RENDERDISTANCE; x++)
+		{
+			WorldLoadChunk(world, x, chunkZ + RENDERDISTANCE * (deltaX > 0) * 2 - 1);
+		}
 	}
+}
+
+void WorldLoadChunk(World *world, int x, int z)
+{
+	uint64_t hash = CHUNK_HASH(x, z);
+
+	// If chunk is active skip
+	if (world->ActiveChunks.find(hash) != world->ActiveChunks.end())
+	{
+		spdlog::debug("Skipping chunk ({}, {})", x, z);
+		return;
+	}
+
+	// If chunk is inactive make it active
+	auto iter = world->InactiveChunks.find(hash);
+	if (iter != world->InactiveChunks.end())
+	{
+		world->ActiveChunks[hash] = iter->second;
+		world->InactiveChunks.erase(hash);
+		return;
+	}
+
+	// Otherwise make the chunk and make it active
+	spdlog::debug("Making chunk ({}, {})", x, z);
+	Chunk chunk{ 0 };
+	ChunkCreate(&chunk, x, z);
+	world->Chunks.push_back(chunk);
+	world->ActiveChunks[CHUNK_HASH(x, z)] = world->Chunks.size() - 1;
+	WorldPushChunkMeshUpdate(world, world->Chunks.size() - 1);
 }
 
 void WorldPushChunkMeshUpdate(World *world, int chunk_id)
