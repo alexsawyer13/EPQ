@@ -214,8 +214,6 @@ void Update()
 		PROFILE_SCOPE_US("PlayerUpdate");
 		PlayerUpdate(&core.player, &core.world);
 		
-		if (core.player.HasChangedBlock)
-			spdlog::debug("Changed block");
 		if (core.player.HasChangedChunk)
 			spdlog::debug("Changed chunk");
 	}
@@ -345,9 +343,9 @@ void OpenGLRender(int width, int height)
 			glm::vec3 vertices[4];
 
 			vertices[0] = low + 0.01f * frame_raycast.Normal;
-			vertices[1] = low + axis1 + 0.001f * frame_raycast.Normal;
-			vertices[2] = low + axis2 + 0.001f * frame_raycast.Normal;
-			vertices[3] = low + axis1 + axis2 + 0.001f * frame_raycast.Normal;
+			vertices[1] = low + axis1 + 0.01f * frame_raycast.Normal;
+			vertices[2] = low + axis2 + 0.01f * frame_raycast.Normal;
+			vertices[3] = low + axis1 + axis2 + 0.01f * frame_raycast.Normal;
 
 			VboSubData(&core.vbos["highlight"], 0, 12 * sizeof(float), vertices);
 			VaoDraw(&core.vaos["highlight"]);

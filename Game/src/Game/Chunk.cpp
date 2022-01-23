@@ -1,4 +1,5 @@
 #include <Game/Chunk.h>
+#include <Game/WorldGeneration.h>
 #include <Data/CubeData.h>
 #include <Core/Profiler.h>
 #include <Core/Core.h>
@@ -6,26 +7,92 @@
 #include <spdlog/spdlog.h>
 #include <glm/gtc/matrix_transform.hpp>
 
-void ChunkCreate(Chunk *chunk, int x, int z)
+void ChunkCreate(Chunk *chunk, int x, int z, int index)
 {
 	PROFILE_SCOPE_US("ChunkCreate");
-	spdlog::debug("ChunkCreate");
 
 	chunk->X = x;
 	chunk->Z = z;
+	chunk->Index = index;
 	chunk->Model = glm::translate(glm::mat4(1.0f), glm::vec3(x * CHUNK_WIDTH, 0, z * CHUNK_WIDTH));
 
 	chunk->Data = new uint16_t[CHUNK_VOLUME];
-	chunk->Posx = nullptr;
-	chunk->Negx = nullptr;
-	chunk->Posz = nullptr;
-	chunk->Negz = nullptr;
 
-	uint16_t grass = BLOCK_PACK(core.BlockIds["grass"], 0);
-	uint16_t dirt = BLOCK_PACK(core.BlockIds["dirt"], 0);
-	uint16_t bedrock = BLOCK_PACK(core.BlockIds["bedrock"], 0);
-	uint16_t stone = BLOCK_PACK(core.BlockIds["stone"], 0);
-	uint16_t furnace_on = BLOCK_PACK(core.BlockIds["furnace_on"], 0);
+	// Pos x
+
+	auto activeIter = core.world.ActiveChunks.find(CHUNK_HASH(x + 1, z));
+	auto inactiveIter = core.world.InactiveChunks.find(CHUNK_HASH(x + 1, z));
+	if (activeIter != core.world.ActiveChunks.end())
+	{
+		chunk->Posx = activeIter->second;
+		core.world.Chunks[activeIter->second].Negx = chunk->Index;
+	}
+	else if (inactiveIter != core.world.InactiveChunks.end())
+	{
+		chunk->Posx = inactiveIter->second;
+		core.world.Chunks[inactiveIter->second].Negx = chunk->Index;
+	}
+	else
+	{
+		chunk->Posx = -1;
+	}
+
+	// Neg x
+
+	activeIter = core.world.ActiveChunks.find(CHUNK_HASH(x - 1, z));
+	inactiveIter = core.world.InactiveChunks.find(CHUNK_HASH(x + 1, z));
+	if (activeIter != core.world.ActiveChunks.end())
+	{
+		chunk->Negx = activeIter->second;
+		core.world.Chunks[activeIter->second].Posx = chunk->Index;
+	}
+	else if (inactiveIter != core.world.InactiveChunks.end())
+	{
+		chunk->Negx = inactiveIter->second;
+		core.world.Chunks[inactiveIter->second].Posx = chunk->Index;
+	}
+	else
+	{
+		chunk->Negx = -1;
+	}
+
+	// Pos z
+
+	activeIter = core.world.ActiveChunks.find(CHUNK_HASH(x, z + 1));
+	inactiveIter = core.world.InactiveChunks.find(CHUNK_HASH(x, z + 1));
+	if (activeIter != core.world.ActiveChunks.end())
+	{
+		chunk->Posz = activeIter->second;
+		core.world.Chunks[activeIter->second].Negz = chunk->Index;
+	}
+	else if (inactiveIter != core.world.InactiveChunks.end())
+	{
+		chunk->Posz = inactiveIter->second;
+		core.world.Chunks[inactiveIter->second].Negz = chunk->Index;
+	}
+	else
+	{
+		chunk->Posz = -1;
+	}
+
+	// Neg z
+
+	activeIter = core.world.ActiveChunks.find(CHUNK_HASH(x, z - 1));
+	inactiveIter = core.world.InactiveChunks.find(CHUNK_HASH(x, z - 1));
+	if (activeIter != core.world.ActiveChunks.end())
+	{
+		chunk->Negz = activeIter->second;
+		core.world.Chunks[activeIter->second].Posz = chunk->Index;
+	}
+	else if (inactiveIter != core.world.InactiveChunks.end())
+	{
+		chunk->Negz = inactiveIter->second;
+		core.world.Chunks[inactiveIter->second].Posz = chunk->Index;
+	}
+	else
+	{
+		chunk->Negz = -1;
+	}
 
 	for (int y = 0; y < CHUNK_HEIGHT; y++)
 	{
@@ -33,24 +100,10 @@ void ChunkCreate(Chunk *chunk, int x, int z)
 		{
 			for (int z = 0; z < CHUNK_WIDTH; z++)
 			{
-				if (y == 0)
-					chunk->Data[CHUNK_INDEX_OF(x, y, z)] = bedrock;
-				else if (y < 64)
-					chunk->Data[CHUNK_INDEX_OF(x, y, z)] = stone;
-				else if (y < 72)
-					chunk->Data[CHUNK_INDEX_OF(x, y, z)] = dirt;
-				else if (y == 72)
-					chunk->Data[CHUNK_INDEX_OF(x, y, z)] = grass;
-				else
-					chunk->Data[CHUNK_INDEX_OF(x, y, z)] = 0;
+				chunk->Data[CHUNK_INDEX_OF(x, y, z)] = GenerateVoxel(x + chunk->X * CHUNK_WIDTH, y, z + chunk->Z * CHUNK_WIDTH);
 			}
 		}
 	}
-
-	//for (int i = 15; i > 0; i--)
-	//	chunk->Data[CHUNK_INDEX_OF(0, i, 0)] = 0;
-
-	//chunk->Data[CHUNK_INDEX_OF(10, CHUNK_HEIGHT - 1, 10)] = furnace_on;
 
 	VaoCreate(&chunk->Vao);
 	VboCreate(&chunk->Vbo);
@@ -67,18 +120,9 @@ void ChunkDestroy(Chunk *chunk)
 	IboDestroy(&chunk->Ibo);
 }
 
-void ChunkSetNeighbours(Chunk *chunk, Chunk *px, Chunk *nx, Chunk *pz, Chunk *nz)
-{
-	chunk->Posx = px;
-	chunk->Negx = nx;
-	chunk->Posz = pz;
-	chunk->Negz = nz;
-}
-
 void ChunkBuildMesh(Chunk *chunk)
 {
 	PROFILE_SCOPE_US("ChunkBuildMesh");
-	spdlog::debug("ChunkBuildMesh");
 
 	std::vector<float> data;
 	std::vector<unsigned int> indices;
@@ -113,29 +157,29 @@ void ChunkBuildMesh(Chunk *chunk)
 
 						if (nx < 0)
 						{
-							if (chunk->Negx)
-								isTransparent = ChunkGetBlock(chunk->Negx, CHUNK_WIDTH - 1, ny, nz).IsTransparent;
+							if (chunk->Negx > 0)
+								isTransparent = ChunkGetBlock(&core.world.Chunks[chunk->Negx], CHUNK_WIDTH - 1, ny, nz).IsTransparent;
 							else
 								isTransparent = false;
 						}
 						else if (nx > CHUNK_WIDTH - 1)
 						{
-							if (chunk->Posx)
-								isTransparent = ChunkGetBlock(chunk->Posx, 0, ny, nz).IsTransparent;
+							if (chunk->Posx > 0)
+								isTransparent = ChunkGetBlock(&core.world.Chunks[chunk->Posx], 0, ny, nz).IsTransparent;
 							else
 								isTransparent = false;
 						}
 						else if (nz < 0)
 						{
-							if (chunk->Negz)
-								isTransparent = ChunkGetBlock(chunk->Negz, nx, ny, CHUNK_WIDTH - 1).IsTransparent;
+							if (chunk->Negz > 0)
+								isTransparent = ChunkGetBlock(&core.world.Chunks[chunk->Negz], nx, ny, CHUNK_WIDTH - 1).IsTransparent;
 							else
 								isTransparent = false;
 						}
 						else if (nz > CHUNK_WIDTH - 1)
 						{
-							if (chunk->Posz)
-								isTransparent = ChunkGetBlock(chunk->Posz, nx, ny, 0).IsTransparent;
+							if (chunk->Posz > 0)
+								isTransparent = ChunkGetBlock(&core.world.Chunks[chunk->Posz], nx, ny, 0).IsTransparent;
 							else
 								isTransparent = false;
 						}
@@ -198,6 +242,13 @@ void ChunkBuildMesh(Chunk *chunk)
 	VaoSetIbo(&chunk->Vao, &chunk->Ibo);
 
 	chunk->Visible = true;
+}
+
+void ChunkDestroyMesh(Chunk *chunk)
+{
+	glInvalidateBufferData(chunk->Vbo.Handle);
+	glInvalidateBufferData(chunk->Ibo.Handle);
+	chunk->Visible = false;
 }
 
 uint16_t ChunkGetBlockId(Chunk *chunk, int x, int y, int z)

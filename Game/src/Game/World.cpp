@@ -1,4 +1,5 @@
 #include <Game/World.h>
+#include <Game/WorldGeneration.h>
 #include <Core/Core.h>
 #include <Graphics/Shader.h>
 #include <Maths/Maths.h>
@@ -6,31 +7,23 @@
 #include <spdlog/spdlog.h>
 
 void WorldLoadChunk(World *world, int x, int z);
+void WorldUnloadChunk(World *world, int x, int z);
 
 void WorldCreate(World *world)
 {
 	world->Chunks.reserve(1000); // TODO: TEMPORARY FIX
+	WorldGenerationSetup(100u);
 
 	for (int x = -RENDERDISTANCE; x <= RENDERDISTANCE; x++)
 	{
 		for (int z = -RENDERDISTANCE; z <= RENDERDISTANCE; z++)
 		{
 			Chunk chunk{ 0 };
-			ChunkCreate(&chunk, x, z);
+			ChunkCreate(&chunk, x, z, world->Chunks.size());
 			world->Chunks.push_back(chunk);
 			world->ActiveChunks[CHUNK_HASH(x, z)] = world->Chunks.size() - 1;
+			world->PendingMesh.push_back(world->Chunks.size() - 1);
 		}
-	}
-
-	for (int i = 0; i < world->Chunks.size(); i++)
-	{
-		Chunk &chunk = world->Chunks[i];
-		//Chunk *posx = WorldGetChunk(world, chunk.X + 1, chunk.Z);
-		//Chunk *negx = WorldGetChunk(world, chunk.X - 1, chunk.Z);
-		//Chunk *posz = WorldGetChunk(world, chunk.X, chunk.Z + 1);
-		//Chunk *negz = WorldGetChunk(world, chunk.X, chunk.Z - 1);
-		//ChunkSetNeighbours(&chunk, posx, negx, posz, negz); TODO: FIX
-		world->PendingMesh.push_back(i);
 	}
 }
 
@@ -65,6 +58,19 @@ Chunk *WorldGetChunk(World *world, int x, int z)
 	auto inactive = world->InactiveChunks.find(hash);
 	if (inactive != world->InactiveChunks.end())
 		return &world->Chunks[world->InactiveChunks[hash]];
+
+	return nullptr;
+}
+
+Chunk *WorldGetChunkIfActive(World *world, int x, int z)
+{
+	ChunkCoord cc = { x, z };
+	uint64_t hash = cc.Hash();
+
+	world->ActiveChunks.find(hash);
+	auto active = world->ActiveChunks.find(hash);
+	if (active != world->ActiveChunks.end())
+		return &world->Chunks[world->ActiveChunks[hash]];
 
 	return nullptr;
 }
@@ -214,70 +220,114 @@ void WorldBreakBlock(World *world, int x, int y, int z)
 
 void WorldUpdate(World *world)
 {
-	// Generate a chunk if any are waiting to be generated
-	if (world->PendingMesh.size() > 0)
-	{
-		Chunk &chunk = world->Chunks[world->PendingMesh.front()];
-		world->PendingMesh.pop_front();
+	PROFILE_SCOPE_US("WorldUpdate");
 
-		ChunkBuildMesh(&chunk);
+	// Generate chunks if any are waiting to be generated
+	for (int i = 0; i < ChunkMeshesPerFrame; i++)
+	{
+		if (world->PendingMesh.size() > 0)
+		{
+			Chunk &chunk = world->Chunks[world->PendingMesh.front()];
+			world->PendingMesh.pop_front();
+
+			ChunkBuildMesh(&chunk);
+		}
 	}
-	
+
 	if (core.player.HasChangedChunk)
 	{
 		int oldChunkX = RoundToLowest((float)core.player.OldPosition.x / CHUNK_WIDTH);
 		int oldChunkZ = RoundToLowest((float)core.player.OldPosition.z / CHUNK_WIDTH);
 		int chunkX = RoundToLowest((float)core.player.Position.x / CHUNK_WIDTH);
 		int chunkZ = RoundToLowest((float)core.player.Position.z / CHUNK_WIDTH);
-		int deltaX = chunkX - oldChunkX;
-		int deltaZ = chunkZ - oldChunkZ;
 
-		spdlog::debug("Old chunk ({}, {}) New chunk ({}, {})", oldChunkX, oldChunkZ, chunkX, chunkZ);
+		// Loop through chunks and see if they should be active still
 
-		int newRowX = chunkX + deltaX;
-		int newRowZ = chunkZ + deltaZ;
+		std::vector<std::pair<int, int>> chunksToUnload(10);
 
-		// Load X row
-		for (int z = chunkZ - RENDERDISTANCE; z <= chunkZ + RENDERDISTANCE; z++)
+		for (auto iter = world->ActiveChunks.begin(); iter != world->ActiveChunks.end(); iter++)
 		{
-			WorldLoadChunk(world, chunkX + RENDERDISTANCE * (deltaX>0)*2-1, z);
+			Chunk *chunk = &world->Chunks[iter->second];
+			int dx = abs(chunk->X - chunkX);
+			int dz = abs(chunk->Z - chunkZ);
+			if (dx <= RENDERDISTANCE && dz <= RENDERDISTANCE)
+			{
+				// Stay active
+			}
+			else
+			{
+				// Deactivate (can't do in the loop otherwise it invalidates iter)
+				//WorldUnloadChunk(world, chunk->X, chunk->Z);
+				chunksToUnload.emplace_back(chunk->X, chunk->Z);
+			}
+		}
+		
+		// Actually unload chunks
+		for (auto pair : chunksToUnload)
+		{
+			WorldUnloadChunk(world, pair.first, pair.second);
 		}
 
-		// Load Z row
+		// Loop through chunks and make sure they're active if they should be
+
 		for (int x = chunkX - RENDERDISTANCE; x <= chunkX + RENDERDISTANCE; x++)
 		{
-			WorldLoadChunk(world, x, chunkZ + RENDERDISTANCE * (deltaX > 0) * 2 - 1);
+			for (int z = chunkZ - RENDERDISTANCE; z <= chunkZ + RENDERDISTANCE; z++)
+			{
+				WorldLoadChunk(world, x, z);
+			}
 		}
 	}
 }
 
 void WorldLoadChunk(World *world, int x, int z)
 {
+	PROFILE_SCOPE_US("WorldLoadChunk");
+
 	uint64_t hash = CHUNK_HASH(x, z);
 
 	// If chunk is active skip
 	if (world->ActiveChunks.find(hash) != world->ActiveChunks.end())
 	{
-		spdlog::debug("Skipping chunk ({}, {})", x, z);
+		//spdlog::debug("Skipping chunk ({}, {})", x, z);
 		return;
 	}
 
-	// If chunk is inactive make it active
+	// If chunk is inactive make it active and build its mesh
 	auto iter = world->InactiveChunks.find(hash);
 	if (iter != world->InactiveChunks.end())
 	{
+		//spdlog::debug("Activating chunk ({}, {})", x, z);
 		world->ActiveChunks[hash] = iter->second;
+		WorldPushChunkMeshUpdate(world, iter->second);
 		world->InactiveChunks.erase(hash);
 		return;
 	}
 
 	// Otherwise make the chunk and make it active
-	spdlog::debug("Making chunk ({}, {})", x, z);
+	//spdlog::debug("Making chunk ({}, {})", x, z);
 	Chunk chunk{ 0 };
-	ChunkCreate(&chunk, x, z);
+	ChunkCreate(&chunk, x, z, world->Chunks.size());
 	world->Chunks.push_back(chunk);
 	world->ActiveChunks[CHUNK_HASH(x, z)] = world->Chunks.size() - 1;
 	WorldPushChunkMeshUpdate(world, world->Chunks.size() - 1);
+}
+
+
+void WorldUnloadChunk(World *world, int x, int z)
+{
+	PROFILE_SCOPE_US("WorldUnloadChunk");
+
+	uint64_t hash = CHUNK_HASH(x, z);
+
+	// If chunk is active, unload
+	auto iter = world->ActiveChunks.find(hash);
+	if (iter != world->ActiveChunks.end())
+	{
+		ChunkDestroyMesh(&world->Chunks[iter->second]);
+		world->InactiveChunks[hash] = iter->second;
+		world->ActiveChunks.erase(iter->first);
+	}
 }
 
 void WorldPushChunkMeshUpdate(World *world, int chunk_id)

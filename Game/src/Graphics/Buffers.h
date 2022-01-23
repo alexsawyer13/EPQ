@@ -19,7 +19,7 @@ struct IndexBuffer
 struct VertexArray
 {
 	GLuint Handle;
-	IndexBuffer *Ibo;
+	size_t IboCount;
 };
 
 struct BufferLayoutElement

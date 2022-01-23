@@ -166,6 +166,7 @@
     <ClCompile Include="src\Game\Player.cpp" />
     <ClCompile Include="src\Game\World.cpp" />
     <ClCompile Include="src\Game\Chunk.cpp" />
+    <ClCompile Include="src\Game\WorldGeneration.cpp" />
     <ClCompile Include="src\Graphics\BatchRenderer.cpp" />
     <ClCompile Include="src\Graphics\Cubemap.cpp" />
     <ClCompile Include="src\Core\Input.cpp" />
@@ -204,6 +205,7 @@
     <ClInclude Include="src\Game\Player.h" />
     <ClInclude Include="src\Game\World.h" />
     <ClInclude Include="src\Core\Input.h" />
+    <ClInclude Include="src\Game\WorldGeneration.h" />
     <ClInclude Include="src\Graphics\BatchRenderer.h" />
     <ClInclude Include="src\Graphics\Cubemap.h" />
     <ClInclude Include="src\Graphics\DebugRender.h" />
@@ -222,6 +224,7 @@
     <ClInclude Include="vendor\imgui\imstb_rectpack.h" />
     <ClInclude Include="vendor\imgui\imstb_textedit.h" />
     <ClInclude Include="vendor\imgui\imstb_truetype.h" />
+    <ClInclude Include="vendor\PerlinNoise\PerlinNoise.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\data\blocks.json" />

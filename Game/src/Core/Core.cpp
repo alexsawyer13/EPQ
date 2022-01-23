@@ -42,7 +42,8 @@ void LoadCoreData()
 	VboData(&core.vbos["cubemap"], sizeof(CubeData::CubeVertices), CubeData::CubeVertices, GL_STATIC_DRAW);
 	VaoAddVbo(&core.vaos["cubemap"], &core.vbos["cubemap"], { {3, GL_FLOAT} });
 
-	core.cubemap.Create("skybox/top.jpg", "skybox/bottom.jpg", "skybox/left.jpg", "skybox/right.jpg", "skybox/front.jpg", "skybox/back.jpg");
+	//core.cubemap.Create("oldskybox/top.jpg", "oldskybox/bottom.jpg", "oldskybox/left.jpg", "oldskybox/right.jpg", "oldskybox/front.jpg", "oldskybox/back.jpg");
+	core.cubemap.Create("skybox/top.png", "skybox/bottom.png", "skybox/side.png", "skybox/side.png", "skybox/side.png", "skybox/side.png");
 
 	// Load textured rectangle
 

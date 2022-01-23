@@ -31,19 +31,19 @@ struct Chunk
 	VertexBuffer Vbo;
 	IndexBuffer Ibo;
 
-	Chunk *Posx, *Negx, *Posz, *Negz;
+	int Posx, Negx, Posz, Negz;
 
-	int X, Z;
+	int X, Z, Index;
 	glm::mat4 Model;
 
 	bool Visible;
 };
 
-void ChunkCreate(Chunk *chunk, int x, int z);
+void ChunkCreate(Chunk *chunk, int x, int z, int index);
 void ChunkDestroy(Chunk *chunk);
 
-void ChunkSetNeighbours(Chunk *chunk, Chunk *px, Chunk *nx, Chunk *pz, Chunk *nz);
 void ChunkBuildMesh(Chunk *chunk);
+void ChunkDestroyMesh(Chunk *chunk);
 
 uint16_t ChunkGetBlockId(Chunk *chunk, int x, int y, int z);
 Block &ChunkGetBlock(Chunk *chunk, int x, int y, int z);
