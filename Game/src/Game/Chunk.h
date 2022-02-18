@@ -31,15 +31,14 @@ struct Chunk
 	VertexBuffer Vbo;
 	IndexBuffer Ibo;
 
-	int Posx, Negx, Posz, Negz;
-
 	int X, Z, Index;
 	glm::mat4 Model;
 
-	bool Visible;
+	bool Visible, Generated;
 };
 
 void ChunkCreate(Chunk *chunk, int x, int z, int index);
+void ChunkGenerate(Chunk *chunk);
 void ChunkDestroy(Chunk *chunk);
 
 void ChunkBuildMesh(Chunk *chunk);

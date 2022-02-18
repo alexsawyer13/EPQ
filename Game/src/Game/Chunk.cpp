@@ -18,82 +18,16 @@ void ChunkCreate(Chunk *chunk, int x, int z, int index)
 
 	chunk->Data = new uint16_t[CHUNK_VOLUME];
 
-	// Pos x
+	VaoCreate(&chunk->Vao);
+	VboCreate(&chunk->Vbo);
+	IboCreate(&chunk->Ibo);
 
-	auto activeIter = core.world.ActiveChunks.find(CHUNK_HASH(x + 1, z));
-	auto inactiveIter = core.world.InactiveChunks.find(CHUNK_HASH(x + 1, z));
-	if (activeIter != core.world.ActiveChunks.end())
-	{
-		chunk->Posx = activeIter->second;
-		core.world.Chunks[activeIter->second].Negx = chunk->Index;
-	}
-	else if (inactiveIter != core.world.InactiveChunks.end())
-	{
-		chunk->Posx = inactiveIter->second;
-		core.world.Chunks[inactiveIter->second].Negx = chunk->Index;
-	}
-	else
-	{
-		chunk->Posx = -1;
-	}
+	chunk->Visible = false;
+	chunk->Generated = false;
+}
 
-	// Neg x
-
-	activeIter = core.world.ActiveChunks.find(CHUNK_HASH(x - 1, z));
-	inactiveIter = core.world.InactiveChunks.find(CHUNK_HASH(x + 1, z));
-	if (activeIter != core.world.ActiveChunks.end())
-	{
-		chunk->Negx = activeIter->second;
-		core.world.Chunks[activeIter->second].Posx = chunk->Index;
-	}
-	else if (inactiveIter != core.world.InactiveChunks.end())
-	{
-		chunk->Negx = inactiveIter->second;
-		core.world.Chunks[inactiveIter->second].Posx = chunk->Index;
-	}
-	else
-	{
-		chunk->Negx = -1;
-	}
-
-	// Pos z
-
-	activeIter = core.world.ActiveChunks.find(CHUNK_HASH(x, z + 1));
-	inactiveIter = core.world.InactiveChunks.find(CHUNK_HASH(x, z + 1));
-	if (activeIter != core.world.ActiveChunks.end())
-	{
-		chunk->Posz = activeIter->second;
-		core.world.Chunks[activeIter->second].Negz = chunk->Index;
-	}
-	else if (inactiveIter != core.world.InactiveChunks.end())
-	{
-		chunk->Posz = inactiveIter->second;
-		core.world.Chunks[inactiveIter->second].Negz = chunk->Index;
-	}
-	else
-	{
-		chunk->Posz = -1;
-	}
-
-	// Neg z
-
-	activeIter = core.world.ActiveChunks.find(CHUNK_HASH(x, z - 1));
-	inactiveIter = core.world.InactiveChunks.find(CHUNK_HASH(x, z - 1));
-	if (activeIter != core.world.ActiveChunks.end())
-	{
-		chunk->Negz = activeIter->second;
-		core.world.Chunks[activeIter->second].Posz = chunk->Index;
-	}
-	else if (inactiveIter != core.world.InactiveChunks.end())
-	{
-		chunk->Negz = inactiveIter->second;
-		core.world.Chunks[inactiveIter->second].Posz = chunk->Index;
-	}
-	else
-	{
-		chunk->Negz = -1;
-	}
-
+void ChunkGenerate(Chunk *chunk)
+{
 	for (int y = 0; y < CHUNK_HEIGHT; y++)
 	{
 		for (int x = 0; x < CHUNK_WIDTH; x++)
@@ -104,12 +38,7 @@ void ChunkCreate(Chunk *chunk, int x, int z, int index)
 			}
 		}
 	}
-
-	VaoCreate(&chunk->Vao);
-	VboCreate(&chunk->Vbo);
-	IboCreate(&chunk->Ibo);
-
-	chunk->Visible = false;
+	chunk->Generated = true;
 }
 
 void ChunkDestroy(Chunk *chunk)
@@ -127,6 +56,12 @@ void ChunkBuildMesh(Chunk *chunk)
 	std::vector<float> data;
 	std::vector<unsigned int> indices;
 	unsigned int currentIndex = 0;
+
+	// Get neighbours
+	Chunk *Posx = WorldGetChunk(&core.world, chunk->X + 1, chunk->Z);
+	Chunk *Negx = WorldGetChunk(&core.world, chunk->X - 1, chunk->Z);
+	Chunk *Posz = WorldGetChunk(&core.world, chunk->X, chunk->Z + 1);
+	Chunk *Negz = WorldGetChunk(&core.world, chunk->X, chunk->Z - 1);
 
 	// Loop over every block
 	for (int y = 0; y < CHUNK_HEIGHT; y++)
@@ -155,35 +90,40 @@ void ChunkBuildMesh(Chunk *chunk)
 						ny = y + CubeData::Normals[i].y;
 						nz = z + CubeData::Normals[i].z;
 
-						if (nx < 0)
-						{
-							if (chunk->Negx > 0)
-								isTransparent = ChunkGetBlock(&core.world.Chunks[chunk->Negx], CHUNK_WIDTH - 1, ny, nz).IsTransparent;
-							else
-								isTransparent = false;
-						}
-						else if (nx > CHUNK_WIDTH - 1)
-						{
-							if (chunk->Posx > 0)
-								isTransparent = ChunkGetBlock(&core.world.Chunks[chunk->Posx], 0, ny, nz).IsTransparent;
-							else
-								isTransparent = false;
-						}
-						else if (nz < 0)
-						{
-							if (chunk->Negz > 0)
-								isTransparent = ChunkGetBlock(&core.world.Chunks[chunk->Negz], nx, ny, CHUNK_WIDTH - 1).IsTransparent;
-							else
-								isTransparent = false;
-						}
-						else if (nz > CHUNK_WIDTH - 1)
-						{
-							if (chunk->Posz > 0)
-								isTransparent = ChunkGetBlock(&core.world.Chunks[chunk->Posz], nx, ny, 0).IsTransparent;
-							else
-								isTransparent = false;
-						}
-						else if (ny < 0 || ny > CHUNK_HEIGHT - 1)
+						// TODO: FIX THIS
+						//if (nx < 0)
+						//{
+						//	if (Negx)
+						//		isTransparent = ChunkGetBlock(Negx, CHUNK_WIDTH - 1, ny, nz).IsTransparent;
+						//	else
+						//		isTransparent = false;
+						//}
+						//else if (nx > CHUNK_WIDTH - 1)
+						//{
+						//	if (Posx)
+						//		isTransparent = ChunkGetBlock(Posx, 0, ny, nz).IsTransparent;
+						//	else
+						//		isTransparent = false;
+						//}
+						//else if (nz < 0)
+						//{
+						//	if (Negz)
+						//		isTransparent = ChunkGetBlock(Negz, nx, ny, CHUNK_WIDTH - 1).IsTransparent;
+						//	else
+						//		isTransparent = false;
+						//}
+						//else if (nz > CHUNK_WIDTH - 1)
+						//{
+						//	if (Posz)
+						//		isTransparent = ChunkGetBlock(Posz, nx, ny, 0).IsTransparent;
+						//	else
+						//		isTransparent = false;
+						//}
+						//else if (ny < 0 || ny > CHUNK_HEIGHT - 1)
+						//{
+						//	isTransparent = true;
+						//}
+						if (nx < 0 || nx > CHUNK_WIDTH - 1 || nz < 0 || nz > CHUNK_WIDTH - 1 || ny < 0 || ny > CHUNK_HEIGHT - 1)
 						{
 							isTransparent = true;
 						}

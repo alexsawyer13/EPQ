@@ -14,7 +14,7 @@ uint16_t GenerateVoxel(int x, int y, int z)
 	int smoothHeight = (int) 72 + smoothNoise * 4;
 
 	double mountainNoise = perlin.noise2D((double)x / 50, (double)z / 50) * 2 - 1;
-	int mountainHeight = (int) 72 + mountainNoise * 30;
+	int mountainHeight = (int) 72 + mountainNoise * 90;
 
 
 	if (y == 0)

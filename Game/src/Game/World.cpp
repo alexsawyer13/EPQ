@@ -20,6 +20,7 @@ void WorldCreate(World *world)
 		{
 			Chunk chunk{ 0 };
 			ChunkCreate(&chunk, x, z, world->Chunks.size());
+			ChunkGenerate(&chunk);
 			world->Chunks.push_back(chunk);
 			world->ActiveChunks[CHUNK_HASH(x, z)] = world->Chunks.size() - 1;
 			world->PendingMesh.push_back(world->Chunks.size() - 1);
@@ -230,6 +231,7 @@ void WorldUpdate(World *world)
 			Chunk &chunk = world->Chunks[world->PendingMesh.front()];
 			world->PendingMesh.pop_front();
 
+			if (!chunk.Generated) ChunkGenerate(&chunk);
 			ChunkBuildMesh(&chunk);
 		}
 	}
@@ -268,7 +270,7 @@ void WorldUpdate(World *world)
 			WorldUnloadChunk(world, pair.first, pair.second);
 		}
 
-		// Loop through chunks and make sure they're active if they should be
+		// Loop through chunks and make sure they're active and generated if they should be
 
 		for (int x = chunkX - RENDERDISTANCE; x <= chunkX + RENDERDISTANCE; x++)
 		{
@@ -307,7 +309,7 @@ void WorldLoadChunk(World *world, int x, int z)
 	// Otherwise make the chunk and make it active
 	//spdlog::debug("Making chunk ({}, {})", x, z);
 	Chunk chunk{ 0 };
-	ChunkCreate(&chunk, x, z, world->Chunks.size());
+	ChunkCreate(&chunk, x, z, world->Chunks.size()); // Don't generate chunk, let that happen when mesh building occurs
 	world->Chunks.push_back(chunk);
 	world->ActiveChunks[CHUNK_HASH(x, z)] = world->Chunks.size() - 1;
 	WorldPushChunkMeshUpdate(world, world->Chunks.size() - 1);
@@ -324,6 +326,7 @@ void WorldUnloadChunk(World *world, int x, int z)
 	auto iter = world->ActiveChunks.find(hash);
 	if (iter != world->ActiveChunks.end())
 	{
+		// TODO: A chunk could be unloaded while still in the pendingmesh queue
 		ChunkDestroyMesh(&world->Chunks[iter->second]);
 		world->InactiveChunks[hash] = iter->second;
 		world->ActiveChunks.erase(iter->first);
