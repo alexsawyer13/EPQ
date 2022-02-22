@@ -28,6 +28,8 @@ void ChunkCreate(Chunk *chunk, int x, int z, int index)
 
 void ChunkGenerate(Chunk *chunk)
 {
+	PROFILE_SCOPE_US("ChunkGenerate");
+
 	for (int y = 0; y < CHUNK_HEIGHT; y++)
 	{
 		for (int x = 0; x < CHUNK_WIDTH; x++)

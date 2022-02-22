@@ -221,8 +221,8 @@ void WorldBreakBlock(World *world, int x, int y, int z)
 
 void WorldUpdate(World *world)
 {
-	PROFILE_SCOPE_US("WorldUpdate");
-
+	{
+		PROFILE_SCOPE_US("WorldUpadte1");
 	// Generate chunks if any are waiting to be generated
 	for (int i = 0; i < ChunkMeshesPerFrame; i++)
 	{
@@ -234,6 +234,7 @@ void WorldUpdate(World *world)
 			if (!chunk.Generated) ChunkGenerate(&chunk);
 			ChunkBuildMesh(&chunk);
 		}
+	}
 	}
 
 	if (core.player.HasChangedChunk)
@@ -247,6 +248,8 @@ void WorldUpdate(World *world)
 
 		std::vector<std::pair<int, int>> chunksToUnload(10);
 
+		{
+			PROFILE_SCOPE_US("WorldUpadte2");
 		for (auto iter = world->ActiveChunks.begin(); iter != world->ActiveChunks.end(); iter++)
 		{
 			Chunk *chunk = &world->Chunks[iter->second];
@@ -263,13 +266,19 @@ void WorldUpdate(World *world)
 				chunksToUnload.emplace_back(chunk->X, chunk->Z);
 			}
 		}
+		}
 		
 		// Actually unload chunks
+		{
+			PROFILE_SCOPE_US("WorldUpadte3");
 		for (auto pair : chunksToUnload)
 		{
 			WorldUnloadChunk(world, pair.first, pair.second);
 		}
+		}
 
+		{
+			PROFILE_SCOPE_US("WorldUpadte4");
 		// Loop through chunks and make sure they're active and generated if they should be
 
 		for (int x = chunkX - RENDERDISTANCE; x <= chunkX + RENDERDISTANCE; x++)
@@ -278,6 +287,7 @@ void WorldUpdate(World *world)
 			{
 				WorldLoadChunk(world, x, z);
 			}
+		}
 		}
 	}
 }

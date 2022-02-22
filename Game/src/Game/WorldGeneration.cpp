@@ -3,9 +3,21 @@
 
 siv::PerlinNoise perlin;
 
+uint16_t grass;
+uint16_t dirt;
+uint16_t bedrock;
+uint16_t stone;
+uint16_t furnace_on;
+
 void WorldGenerationSetup(unsigned int seed)
 {
 	perlin.reseed(seed);
+
+	grass = BLOCK_PACK(core.BlockIds["grass"], 0);
+	dirt = BLOCK_PACK(core.BlockIds["dirt"], 0);
+	bedrock = BLOCK_PACK(core.BlockIds["bedrock"], 0);
+	stone = BLOCK_PACK(core.BlockIds["stone"], 0);
+	furnace_on = BLOCK_PACK(core.BlockIds["furnace_on"], 0);
 }
 
 uint16_t GenerateVoxel(int x, int y, int z)
@@ -18,41 +30,33 @@ uint16_t GenerateVoxel(int x, int y, int z)
 
 
 	if (y == 0)
-		return BLOCK_PACK(core.BlockIds["bedrock"], 0);
+		return bedrock;
 
 	if (smoothHeight > mountainHeight)
 	{
-	if (y > smoothHeight)
-		return 0;
-	else if (y == smoothHeight)
-		return BLOCK_PACK(core.BlockIds["grass"], 0);
-	else if (y > smoothHeight - 5)
-		return BLOCK_PACK(core.BlockIds["dirt"], 0);
-	else
-		return BLOCK_PACK(core.BlockIds["stone"], 0);
+		if (y > smoothHeight)
+			return 0;
+		else if (y == smoothHeight)
+			return grass;
+		else if (y > smoothHeight - 5)
+			return dirt;
+		else
+			return stone;
 	}
 	else
 	{
 		if (y > mountainHeight)
 			return 0;
 		else if (y > mountainHeight - 5 && mountainHeight - smoothHeight > 10) // Big mountains
-			return BLOCK_PACK(core.BlockIds["stone"], 0);
+			return stone;
 		else if (y == mountainHeight)
-			return BLOCK_PACK(core.BlockIds["grass"], 0);
+			return grass;
 		else if (y > smoothHeight - 5)
-			return BLOCK_PACK(core.BlockIds["dirt"], 0);
+			return dirt;
 		else
-			return BLOCK_PACK(core.BlockIds["stone"], 0);
+			return stone;
 	}
 
 
 	return 0;
 }
-
-/*
-uint16_t grass = BLOCK_PACK(core.BlockIds["grass"], 0);
-uint16_t dirt = BLOCK_PACK(core.BlockIds["dirt"], 0);
-uint16_t bedrock = BLOCK_PACK(core.BlockIds["bedrock"], 0);
-uint16_t stone = BLOCK_PACK(core.BlockIds["stone"], 0);
-uint16_t furnace_on = BLOCK_PACK(core.BlockIds["furnace_on"], 0);
-*/
