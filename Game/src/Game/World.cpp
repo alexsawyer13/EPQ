@@ -221,8 +221,6 @@ void WorldBreakBlock(World *world, int x, int y, int z)
 
 void WorldUpdate(World *world)
 {
-	PROFILE_SCOPE_US("WorldUpdate");
-
 	// Generate chunks if any are waiting to be generated
 	for (int i = 0; i < ChunkMeshesPerFrame; i++)
 	{

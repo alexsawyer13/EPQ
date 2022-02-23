@@ -216,6 +216,7 @@
     <ClInclude Include="src\Maths\Types.h" />
     <ClInclude Include="src\Physics\AABB.h" />
     <ClInclude Include="src\Physics\VoxelRayCast.h" />
+    <ClInclude Include="vendor\FastNoiseLite\FastNoiseLite.h" />
     <ClInclude Include="vendor\imgui\imconfig.h" />
     <ClInclude Include="vendor\imgui\imgui.h" />
     <ClInclude Include="vendor\imgui\imgui_impl_glfw.h" />
