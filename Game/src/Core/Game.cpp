@@ -50,6 +50,20 @@ glm::vec4 highlight_colour = glm::vec4(1.0f, 1.0f, 1.0f, 0.4f);
 
 bool ImGui_enabled = true;
 
+const std::string hotbar_icon[9] = {
+	"dirt",
+	"grass",
+	"stone",
+	"cobblestone",
+	"oak_planks",
+	"oak_log",
+	"bedrock",
+	"furnace_on",
+	"dirt",
+};
+
+int active_hotbar_slot = 0;
+
 void Start()
 {
 	// Setup
@@ -233,14 +247,21 @@ void Update()
 			if (core.input.IsMouseCaptured && core.input.Keys[GLFW_MOUSE_BUTTON_LEFT] == Pressed)
 				WorldBreakBlock(&core.world, frame_raycast.Block.x, frame_raycast.Block.y, frame_raycast.Block.z);
 			if (core.input.IsMouseCaptured && core.input.Keys[GLFW_MOUSE_BUTTON_RIGHT] == Pressed)
-				WorldSetBlock(&core.world, frame_raycast.Block.x + frame_raycast.Normal.x, frame_raycast.Block.y + frame_raycast.Normal.y, frame_raycast.Block.z + frame_raycast.Normal.z, core.BlockIds["oak_planks"]);
+				WorldSetBlock(&core.world, frame_raycast.Block.x + frame_raycast.Normal.x, frame_raycast.Block.y + frame_raycast.Normal.y, frame_raycast.Block.z + frame_raycast.Normal.z, core.BlockIds[hotbar_icon[active_hotbar_slot]]);
 		}
 	}
 
-		if (core.input.IsMouseCaptured && core.input.Keys[GLFW_KEY_K] == Pressed)
-			core.player.EnableFlight = !core.player.EnableFlight;
-		if (core.input.IsMouseCaptured && core.input.Keys[GLFW_KEY_N] == Pressed)
-			core.player.EnableNoclip = !core.player.EnableNoclip;
+	if (core.input.IsMouseCaptured && core.input.Keys[GLFW_KEY_K] == Pressed)
+		core.player.EnableFlight = !core.player.EnableFlight;
+	if (core.input.IsMouseCaptured && core.input.Keys[GLFW_KEY_N] == Pressed)
+		core.player.EnableNoclip = !core.player.EnableNoclip;
+
+	// Hotbar
+	for (int i = 1; i <= 10; i++)
+	{
+		if (core.input.Keys[GLFW_KEY_0 + (i%10)] == Pressed)
+			active_hotbar_slot = i - 1;
+	}
 
 	// Csv stuff
 
@@ -367,7 +388,13 @@ void OpenGLRender(int width, int height)
 			core.uirenderer.Quads.push_back({
 				{(width-9*64)/2 + i*64, 0, 0},
 				{64, 64},
-				&core.textures["hotbar_icon"]
+				(active_hotbar_slot == i) ? &core.textures["hotbar_icon_on"] : &core.textures["hotbar_icon"]
+				});
+
+			core.uirenderer.Quads.push_back({
+				{(width - 9 * 64) / 2 + i * 64 + 8, 8, 1},
+				{48, 48},
+				&core.textures[hotbar_icon[i]]
 				});
 		}
 

@@ -115,5 +115,18 @@
 		"Right": "block/oak_planks",
 		"Front": "block/oak_planks",
 		"Back": "block/oak_planks"
+	},
+	"oak_log": {
+		"IsBlock": true,
+		"IsTransparent": false,
+		"HasMetadata": false,
+		"Collider": "block",
+		"ItemDrop": "none",
+		"Top": "block/oak_log",
+		"Bottom": "block/oak_log",
+		"Left": "block/oak_log",
+		"Right": "block/oak_log",
+		"Front": "block/oak_log",
+		"Back": "block/oak_log"
 	}
 }

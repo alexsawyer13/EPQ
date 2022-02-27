@@ -51,12 +51,6 @@ uint16_t GenerateVoxel(int x, int y, int z)
     float stoneHeightMap = simplexStone1 + simplexStone2;
     float baseStoneHeight = ChunkHeight * .25f + stoneHeightMap;
 
-
-    //float cliffThing = noise.GetSimplex(x * 1f, z * 1f, y) * 10;
-    //float cliffThingMask = noise.GetSimplex(x * .4f, z * .4f) + .3f;
-
-
-
     //BlockType blockType = BlockType.Air;
     uint16_t blockType = 0;
 
@@ -77,55 +71,5 @@ uint16_t GenerateVoxel(int x, int y, int z)
     if (caveNoise1 > fmaxf(caveMask, .2f))
         blockType = 0;
 
-    /*if(blockType != BlockType.Air)
-        blockType = BlockType.Stone;*/
-
-        //if(blockType == BlockType.Air && noise.GetSimplex(x * 4f, y * 4f, z*4f) < 0)
-          //  blockType = BlockType.Dirt;
-
-        //if(Mathf.PerlinNoise(x * .1f, z * .1f) * 10 + y < TerrainChunk.chunkHeight * .5f)
-        //    return BlockType.Grass;
-
     return blockType;
 }
-
-//uint16_t GenerateVoxel(int x, int y, int z)
-//{
-//	double smoothNoise = perlin.noise2D((double)x / 25, (double)z / 25) * 2 - 1;
-//	int smoothHeight = (int)72 + smoothNoise * 4;
-//
-//	double mountainNoise = perlin.noise2D((double)x / 50, (double)z / 50) * 2 - 1;
-//	int mountainHeight = (int)72 + mountainNoise * 90;
-//
-//
-//	if (y == 0)
-//		return bedrock;
-//
-//	if (smoothHeight > mountainHeight)
-//	{
-//		if (y > smoothHeight)
-//			return 0;
-//		else if (y == smoothHeight)
-//			return grass;
-//		else if (y > smoothHeight - 5)
-//			return dirt;
-//		else
-//			return stone;
-//	}
-//	else
-//	{
-//		if (y > mountainHeight)
-//			return 0;
-//		else if (y > mountainHeight - 5 && mountainHeight - smoothHeight > 10) // Big mountains
-//			return stone;
-//		else if (y == mountainHeight)
-//			return grass;
-//		else if (y > smoothHeight - 5)
-//			return dirt;
-//		else
-//			return stone;
-//	}
-//
-//
-//	return 0;
-//}

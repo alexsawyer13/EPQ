@@ -15,6 +15,8 @@ unsigned int rectangleIndices[] = {
 	2, 1, 3,
 };
 
+void _LoadTexture(const std::string &name, const std::string &src);
+
 void LoadCoreData()
 {
 	TexArrayCreate(&core.block_texarray, T_WIDTH, T_HEIGHT, 100);
@@ -61,20 +63,20 @@ void LoadCoreData()
 	VaoSetIbo(&core.vaos["rectangle"], &core.ibos["rectangle"]);
 
 	// Load textures
-	core.textures["crosshair"] = {};
-	Texture2DCreate(&core.textures["crosshair"]);
-	Image image("textures/crosshair.png", true);
-	Texture2DSetData(&core.textures["crosshair"], &image);
 
-	core.textures["none"] = {};
-	Texture2DCreate(&core.textures["none"]);
-	Image none_texture_image("textures/none.png", true);
-	Texture2DSetData(&core.textures["none"], &none_texture_image);
+	_LoadTexture("none", "textures/none.png");
+	_LoadTexture("crosshair", "textures/crosshair.png");
+	_LoadTexture("hotbar_icon", "textures/hotbar_icon_piskel.png");
+	_LoadTexture("hotbar_icon_on", "textures/hotbar_icon_on_piskel.png");
 
-	core.textures["hotbar_icon"] = {};
-	Texture2DCreate(&core.textures["hotbar_icon"]);
-	Image image2("textures/hotbar_icon_piskel.png", true);
-	Texture2DSetData(&core.textures["hotbar_icon"], &image2);
+	_LoadTexture("dirt", "textures/block/dirt.png");
+	_LoadTexture("grass", "textures/block/grass_block_side.png");
+	_LoadTexture("stone", "textures/block/stone.png"); 
+	_LoadTexture("cobblestone", "textures/block/cobblestone.png");
+	_LoadTexture("oak_planks", "textures/block/oak_planks.png");
+	_LoadTexture("oak_log", "textures/block/oak_log.png");
+	_LoadTexture("bedrock", "textures/block/bedrock.png");
+	_LoadTexture("furnace_on", "textures/block/furnace_front.png");
 
 	// Load rectangle for highlighting block faces
 	core.vaos["highlight"] = {};
@@ -115,4 +117,12 @@ void FreeCoreData()
 	{
 		IboDestroy(&iter.second);
 	}
+}
+
+void _LoadTexture(const std::string &name, const std::string &src)
+{
+	core.textures[name] = {};
+	Texture2DCreate(&core.textures[name]);
+	Image image(src, true);
+	Texture2DSetData(&core.textures[name], &image);
 }
