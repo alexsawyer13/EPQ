@@ -261,7 +261,7 @@ void WorldUpdate(World *world)
 				chunksToUnload.emplace_back(chunk->X, chunk->Z);
 			}
 		}
-		
+
 		// Actually unload chunks
 		for (auto pair : chunksToUnload)
 		{

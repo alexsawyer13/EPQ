@@ -19,20 +19,19 @@ void WorldGenerationSetup(unsigned int seed)
 {
     noise.SetSeed(69696969);
 
-	grass = BLOCK_PACK(core.BlockIds["grass"], 0);
-	dirt = BLOCK_PACK(core.BlockIds["dirt"], 0);
-	bedrock = BLOCK_PACK(core.BlockIds["bedrock"], 0);
-	stone = BLOCK_PACK(core.BlockIds["stone"], 0);
-	furnace_on = BLOCK_PACK(core.BlockIds["furnace_on"], 0);
+    grass = BLOCK_PACK(core.BlockIds["grass"], 0);
+    dirt = BLOCK_PACK(core.BlockIds["dirt"], 0);
+    bedrock = BLOCK_PACK(core.BlockIds["bedrock"], 0);
+    stone = BLOCK_PACK(core.BlockIds["stone"], 0);
+    furnace_on = BLOCK_PACK(core.BlockIds["furnace_on"], 0);
 }
 
 //get the block type at a specific coordinate
 uint16_t GenerateVoxel(int x, int y, int z)
 {
-    if (y == 0)
-        return bedrock;
+    if (y == 0) return bedrock;
 
-        //print(noise.GetSimplex(x, z));
+    //print(noise.GetSimplex(x, z));
     float simplex1 = noise.GetNoise(x * .8f, z * .8f) * 10;
     float simplex2 = noise.GetNoise(x * 3.0f, z * 3.0f) * 10 * (noise.GetNoise(x * .3f, z * .3f) + .5f);
 
