@@ -29,6 +29,7 @@ void WorldDestroy(World *world);
 
 void WorldDrawChunks(World *world);
 void WorldPushChunkMeshUpdate(World *world, int chunk_id);
+void WorldPushChunkMeshPriorityUpdate(World *world, int chunk_id);
 
 Chunk *WorldGetChunk(World *world, int x, int z);
 Chunk *WorldGetChunkIfActive(World *world, int x, int z);

@@ -124,14 +124,14 @@ void WorldSetBlock(World *world, int x, int y, int z, uint16_t block_id)
 
 	world->Chunks[iter->second].Data[CHUNK_INDEX_OF(localX, y, localZ)] = BLOCK_PACK(block_id, 0);
 
-	WorldPushChunkMeshUpdate(world, iter->second);
+	WorldPushChunkMeshPriorityUpdate(world, iter->second);
 
 	if (localX == CHUNK_WIDTH - 1)
 	{
 		auto niter = world->ActiveChunks.find(CHUNK_HASH(chunkX + 1, chunkZ));
 		if (niter != world->ActiveChunks.end()) // Found neighbouring chunk in active chunks
 		{
-			WorldPushChunkMeshUpdate(world, niter->second);
+			WorldPushChunkMeshPriorityUpdate(world, niter->second);
 		}
 	}
 	if (localX == 0)
@@ -139,7 +139,7 @@ void WorldSetBlock(World *world, int x, int y, int z, uint16_t block_id)
 		auto niter = world->ActiveChunks.find(CHUNK_HASH(chunkX - 1, chunkZ));
 		if (niter != world->ActiveChunks.end()) // Found neighbouring chunk in active chunks
 		{
-			WorldPushChunkMeshUpdate(world, niter->second);
+			WorldPushChunkMeshPriorityUpdate(world, niter->second);
 		}
 	}
 	if (localZ == CHUNK_WIDTH - 1)
@@ -147,7 +147,7 @@ void WorldSetBlock(World *world, int x, int y, int z, uint16_t block_id)
 		auto niter = world->ActiveChunks.find(CHUNK_HASH(chunkX, chunkZ + 1));
 		if (niter != world->ActiveChunks.end()) // Found neighbouring chunk in active chunks
 		{
-			WorldPushChunkMeshUpdate(world, niter->second);
+			WorldPushChunkMeshPriorityUpdate(world, niter->second);
 		}
 	}
 	if (localZ == 0)
@@ -155,7 +155,7 @@ void WorldSetBlock(World *world, int x, int y, int z, uint16_t block_id)
 		auto niter = world->ActiveChunks.find(CHUNK_HASH(chunkX, chunkZ - 1));
 		if (niter != world->ActiveChunks.end()) // Found neighbouring chunk in active chunks
 		{
-			WorldPushChunkMeshUpdate(world, niter->second);
+			WorldPushChunkMeshPriorityUpdate(world, niter->second);
 		}
 	}
 }
@@ -188,7 +188,7 @@ void WorldBreakBlock(World *world, int x, int y, int z)
 		auto niter = world->ActiveChunks.find(CHUNK_HASH(chunkX + 1, chunkZ));
 		if (niter != world->ActiveChunks.end()) // Found neighbouring chunk in active chunks
 		{
-			WorldPushChunkMeshUpdate(world, niter->second);
+			WorldPushChunkMeshPriorityUpdate(world, niter->second);
 		}
 	}
 	if (localX == 0)
@@ -196,7 +196,7 @@ void WorldBreakBlock(World *world, int x, int y, int z)
 		auto niter = world->ActiveChunks.find(CHUNK_HASH(chunkX - 1, chunkZ));
 		if (niter != world->ActiveChunks.end()) // Found neighbouring chunk in active chunks
 		{
-			WorldPushChunkMeshUpdate(world, niter->second);
+			WorldPushChunkMeshPriorityUpdate(world, niter->second);
 		}
 	}
 	if (localZ == CHUNK_WIDTH - 1)
@@ -204,7 +204,7 @@ void WorldBreakBlock(World *world, int x, int y, int z)
 		auto niter = world->ActiveChunks.find(CHUNK_HASH(chunkX, chunkZ + 1));
 		if (niter != world->ActiveChunks.end()) // Found neighbouring chunk in active chunks
 		{
-			WorldPushChunkMeshUpdate(world, niter->second);
+			WorldPushChunkMeshPriorityUpdate(world, niter->second);
 		}
 	}
 	if (localZ == 0)
@@ -212,11 +212,11 @@ void WorldBreakBlock(World *world, int x, int y, int z)
 		auto niter = world->ActiveChunks.find(CHUNK_HASH(chunkX, chunkZ - 1));
 		if (niter != world->ActiveChunks.end()) // Found neighbouring chunk in active chunks
 		{
-			WorldPushChunkMeshUpdate(world, niter->second);
+			WorldPushChunkMeshPriorityUpdate(world, niter->second);
 		}
 	}
 
-	WorldPushChunkMeshUpdate(world, iter->second);
+	WorldPushChunkMeshPriorityUpdate(world, iter->second);
 }
 
 void WorldUpdate(World *world)
@@ -345,5 +345,22 @@ void WorldPushChunkMeshUpdate(World *world, int chunk_id)
 	if (!alreadyPending)
 	{
 		world->PendingMesh.push_back(chunk_id);
+	}
+}
+
+void WorldPushChunkMeshPriorityUpdate(World *world, int chunk_id)
+{
+	bool alreadyPending = false;
+	for (int i = 0; i < world->PendingMesh.size(); i++)
+	{
+		if (world->PendingMesh[i] == chunk_id)
+		{
+			alreadyPending = true;
+		}
+	}
+
+	if (!alreadyPending)
+	{
+		world->PendingMesh.push_front(chunk_id);
 	}
 }
