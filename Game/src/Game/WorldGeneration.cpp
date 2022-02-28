@@ -17,6 +17,7 @@ FastNoiseLite noise;
 
 void WorldGenerationSetup(unsigned int seed)
 {
+    noise.SetNoiseType(FastNoiseLite::NoiseType::NoiseType_Perlin);
     noise.SetSeed(69696969);
 
     grass = BLOCK_PACK(core.BlockIds["grass"], 0);
@@ -31,7 +32,6 @@ uint16_t GenerateVoxel(int x, int y, int z)
 {
     if (y == 0) return bedrock;
 
-    //print(noise.GetSimplex(x, z));
     float simplex1 = noise.GetNoise(x * .8f, z * .8f) * 10;
     float simplex2 = noise.GetNoise(x * 3.0f, z * 3.0f) * 10 * (noise.GetNoise(x * .3f, z * .3f) + .5f);
 

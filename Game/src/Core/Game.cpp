@@ -374,7 +374,7 @@ void OpenGLRender(int width, int height)
 
 		core.shaders["batch"].Bind();
 		core.shaders["batch"].SetMat4("u_Proj", ortho);
-
+		
 		// Crosshair
 		core.uirenderer.Quads.push_back({
 				{float(width - crosshair_size) / 2, float(height - crosshair_size) / 2, 0},
