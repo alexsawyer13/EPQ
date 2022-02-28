@@ -30,16 +30,29 @@ void ChunkGenerate(Chunk *chunk)
 {
 	PROFILE_SCOPE_US("ChunkGenerate");
 
-	for (int y = 0; y < CHUNK_HEIGHT; y++)
+	//for (int y = 0; y < CHUNK_HEIGHT; y++)
+	//{
+	//	for (int x = 0; x < CHUNK_WIDTH; x++)
+	//	{
+	//		for (int z = 0; z < CHUNK_WIDTH; z++)
+	//		{
+	//			chunk->Data[CHUNK_INDEX_OF(x, y, z)] = GenerateVoxel(x + chunk->X * CHUNK_WIDTH, y, z + chunk->Z * CHUNK_WIDTH);
+	//		}
+	//	}
+	//}
+
+	for (int x = 0; x < CHUNK_WIDTH; x++)
 	{
-		for (int x = 0; x < CHUNK_WIDTH; x++)
+		for (int z = 0; z < CHUNK_WIDTH; z++)
 		{
-			for (int z = 0; z < CHUNK_WIDTH; z++)
+			std::array<uint16_t, CHUNK_HEIGHT> strip = GenerateVoxelStrip(x + chunk->X * CHUNK_WIDTH, z + chunk->Z * CHUNK_WIDTH);
+			for (int y = 0; y < CHUNK_HEIGHT; y++)
 			{
-				chunk->Data[CHUNK_INDEX_OF(x, y, z)] = GenerateVoxel(x + chunk->X * CHUNK_WIDTH, y, z + chunk->Z * CHUNK_WIDTH);
+				chunk->Data[CHUNK_INDEX_OF(x, y, z)] = strip[y];
 			}
 		}
 	}
+
 	chunk->Generated = true;
 }
 

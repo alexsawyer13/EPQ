@@ -11,6 +11,7 @@ constexpr int CHUNK_AREA = (CHUNK_WIDTH * CHUNK_WIDTH);
 constexpr int CHUNK_VOLUME = (CHUNK_AREA * CHUNK_HEIGHT);
 
 #define CHUNK_INDEX_OF(x, y, z) ((y) * CHUNK_AREA + (z) * CHUNK_WIDTH + (x))
+//#define CHUNK_INDEX_OF(x, y, z) ((x) * CHUNK_WIDTH * CHUNK_HEIGHT + (z) * CHUNK_WIDTH + (y))
 
 /*
 uint16_t is a 2 byte data structure
