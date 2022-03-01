@@ -177,6 +177,7 @@
     <ClCompile Include="src\Graphics\Shader.cpp" />
     <ClCompile Include="src\Maths\Maths.cpp" />
     <ClCompile Include="src\Physics\AABB.cpp" />
+    <ClCompile Include="src\Physics\Frustum.cpp" />
     <ClCompile Include="src\Physics\VoxelRayCast.cpp" />
     <ClCompile Include="vendor\glad-src\glad.c" />
     <ClCompile Include="vendor\imgui\imgui.cpp" />
@@ -215,6 +216,7 @@
     <ClInclude Include="src\Maths\Maths.h" />
     <ClInclude Include="src\Maths\Types.h" />
     <ClInclude Include="src\Physics\AABB.h" />
+    <ClInclude Include="src\Physics\Frustum.h" />
     <ClInclude Include="src\Physics\VoxelRayCast.h" />
     <ClInclude Include="vendor\FastNoiseLite\FastNoiseLite.h" />
     <ClInclude Include="vendor\imgui\imconfig.h" />

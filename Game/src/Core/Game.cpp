@@ -319,7 +319,7 @@ void OpenGLRender(int width, int height)
 
 		{
 			PROFILE_SCOPE_US("WorldDrawChunks");
-			WorldDrawChunks(&core.world);
+			WorldDrawChunks(&core.world, width, height);
 		}
 	}
 

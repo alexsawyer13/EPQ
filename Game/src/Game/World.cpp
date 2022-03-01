@@ -3,6 +3,7 @@
 #include <Core/Core.h>
 #include <Graphics/Shader.h>
 #include <Maths/Maths.h>
+#include <physics/Frustum.h>
 
 #include <spdlog/spdlog.h>
 
@@ -33,15 +34,20 @@ void WorldDestroy(World *world)
 
 }
 
-void WorldDrawChunks(World *world)
+void WorldDrawChunks(World *world, int width, int height)
 {
+	//Frustum frustum = CreateFrustumFromPlayer(&core.player, glm::radians(45.0F), (float)width/height, 0.1F, 1000.0f);
+
 	for (auto iter = world->ActiveChunks.begin(); iter != world->ActiveChunks.end(); ++iter)
 	{
 		Chunk &chunk = world->Chunks[iter->second];
 		if (chunk.Visible)
 		{
-			core.shaders["optimisedtexarray"].SetMat4("u_Model", chunk.Model);
-			VaoDraw(&world->Chunks[iter->second].Vao);
+			//if (FrustumCheckCuboid(frustum, (chunk.X+0.5f) * CHUNK_WIDTH, (float)CHUNK_HEIGHT * 0.5f, (chunk.Z+0.5f) * CHUNK_WIDTH, (float)CHUNK_WIDTH * 0.5f, (float)CHUNK_HEIGHT * 0.5f, (float)CHUNK_WIDTH * 0.5f))
+			{
+				core.shaders["optimisedtexarray"].SetMat4("u_Model", chunk.Model);
+				VaoDraw(&world->Chunks[iter->second].Vao);
+			}
 		}
 	}
 }

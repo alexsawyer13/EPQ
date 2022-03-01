@@ -27,7 +27,7 @@ struct World
 void WorldCreate(World *world);
 void WorldDestroy(World *world);
 
-void WorldDrawChunks(World *world);
+void WorldDrawChunks(World *world, int width, int height);
 void WorldPushChunkMeshUpdate(World *world, int chunk_id);
 void WorldPushChunkMeshPriorityUpdate(World *world, int chunk_id);
 
