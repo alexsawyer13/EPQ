@@ -225,6 +225,11 @@ void WorldBreakBlock(World *world, int x, int y, int z)
 	WorldPushChunkMeshPriorityUpdate(world, iter->second);
 }
 
+Block &WorldGetBlock(World *world, float x, float y, float z)
+{
+	return WorldGetBlock(world, RoundToLowest(x), RoundToLowest(y), RoundToLowest(z));
+}
+
 void WorldUpdate(World *world)
 {
 	// Generate chunks if any are waiting to be generated

@@ -11,10 +11,11 @@
 glm::vec3 s_WorldUp(0.0f, 1.0f, 0.0f);
 constexpr float s_SensitivityModifier = 0.02f;
 constexpr float s_Gravity = -9.81f;
-constexpr float s_TerminalVelocity = -20.0f;
+constexpr float s_TerminalVelocity = -40.0f;
+constexpr float s_PlayerHeight = 1.9f;
 const glm::vec3 s_PlayerEyeOffset(0.0f, 1.8f, 0.0f);
 
-constexpr float s_PlayerWidth = 0.0f;
+constexpr float s_PlayerWidth = 0.3f;
 
 glm::vec3 direction(0.0f);
 
@@ -133,7 +134,7 @@ void PlayerUpdatePhysics(Player *player, World *world)
 	
 	player->Velocity.x = direction.x * player->Speed;
 	player->Velocity.z = direction.z * player->Speed;
-	player->Velocity.y = direction.y * player->Speed;
+	if (direction.y != 0.0f) player->Velocity.y = direction.y * player->Speed;
 
 	if (!player->EnableFlight)
 	{
@@ -212,13 +213,13 @@ void PlayerCalculateView(Player *player)
 bool PlayerPosY(Player *player, float delta)
 {
 	return (
-		WorldGetBlock(&core.world, player->Position.x - s_PlayerWidth, player->Position.y + 2.0f + delta, player->Position.z - s_PlayerWidth).Collider == Collider::Block
+		WorldGetBlock(&core.world, player->Position.x - s_PlayerWidth, player->Position.y + s_PlayerHeight + delta, player->Position.z - s_PlayerWidth).Collider == Collider::Block
 		||
-		WorldGetBlock(&core.world, player->Position.x + s_PlayerWidth, player->Position.y + 2.0f + delta, player->Position.z - s_PlayerWidth).Collider == Collider::Block
+		WorldGetBlock(&core.world, player->Position.x + s_PlayerWidth, player->Position.y + s_PlayerHeight + delta, player->Position.z - s_PlayerWidth).Collider == Collider::Block
 		||
-		WorldGetBlock(&core.world, player->Position.x - s_PlayerWidth, player->Position.y + 2.0f + delta, player->Position.z + s_PlayerWidth).Collider == Collider::Block
+		WorldGetBlock(&core.world, player->Position.x - s_PlayerWidth, player->Position.y + s_PlayerHeight + delta, player->Position.z + s_PlayerWidth).Collider == Collider::Block
 		||
-		WorldGetBlock(&core.world, player->Position.x + s_PlayerWidth, player->Position.y + 2.0f + delta, player->Position.z + s_PlayerWidth).Collider == Collider::Block
+		WorldGetBlock(&core.world, player->Position.x + s_PlayerWidth, player->Position.y + s_PlayerHeight + delta, player->Position.z + s_PlayerWidth).Collider == Collider::Block
 		);
 }
 
@@ -239,7 +240,8 @@ bool PlayerPosX(Player *player)
 {
 	return (
 		WorldGetBlock(&core.world, player->Position.x + s_PlayerWidth, player->Position.y, player->Position.z).Collider == Collider::Block ||
-		WorldGetBlock(&core.world, player->Position.x + s_PlayerWidth, player->Position.y + 1.0f, player->Position.z).Collider == Collider::Block
+		WorldGetBlock(&core.world, player->Position.x + s_PlayerWidth, player->Position.y + 1.0f, player->Position.z).Collider == Collider::Block ||
+		(WorldGetBlock(&core.world, player->Position.x + s_PlayerWidth, player->Position.y + 2.0f, player->Position.z).Collider == Collider::Block && abs(player->Position.y - RoundToLowest(player->Position.y)) > 2.0f - s_PlayerHeight)
 		);
 }
 
@@ -247,7 +249,8 @@ bool PlayerNegX(Player *player)
 {
 	return (
 		WorldGetBlock(&core.world, player->Position.x - s_PlayerWidth, player->Position.y, player->Position.z).Collider == Collider::Block ||
-		WorldGetBlock(&core.world, player->Position.x - s_PlayerWidth, player->Position.y + 1.0f, player->Position.z).Collider == Collider::Block
+		WorldGetBlock(&core.world, player->Position.x - s_PlayerWidth, player->Position.y + 1.0f, player->Position.z).Collider == Collider::Block ||
+		(WorldGetBlock(&core.world, player->Position.x - s_PlayerWidth, player->Position.y + 2.0f, player->Position.z).Collider == Collider::Block && abs(player->Position.y - RoundToLowest(player->Position.y)) > 2.0f - s_PlayerHeight)
 		);
 }
 
@@ -255,7 +258,8 @@ bool PlayerPosZ(Player *player)
 {
 	return (
 		WorldGetBlock(&core.world, player->Position.x, player->Position.y, player->Position.z + s_PlayerWidth).Collider == Collider::Block ||
-		WorldGetBlock(&core.world, player->Position.x, player->Position.y + 1.0f, player->Position.z + s_PlayerWidth).Collider == Collider::Block
+		WorldGetBlock(&core.world, player->Position.x, player->Position.y + 1.0f, player->Position.z + s_PlayerWidth).Collider == Collider::Block ||
+		(WorldGetBlock(&core.world, player->Position.x, player->Position.y + 2.0f, player->Position.z + s_PlayerWidth).Collider == Collider::Block && abs(player->Position.y - RoundToLowest(player->Position.y)) > 2.0f - s_PlayerHeight)
 		);
 }
 
@@ -263,6 +267,7 @@ bool PlayerNegZ(Player *player)
 {
 	return (
 		WorldGetBlock(&core.world, player->Position.x, player->Position.y, player->Position.z - s_PlayerWidth).Collider == Collider::Block ||
-		WorldGetBlock(&core.world, player->Position.x, player->Position.y + 1.0f, player->Position.z - s_PlayerWidth).Collider == Collider::Block
+		WorldGetBlock(&core.world, player->Position.x, player->Position.y + 1.0f, player->Position.z - s_PlayerWidth).Collider == Collider::Block ||
+		(WorldGetBlock(&core.world, player->Position.x, player->Position.y + 2.0f, player->Position.z - s_PlayerWidth).Collider == Collider::Block && abs(player->Position.y - RoundToLowest(player->Position.y)) > 2.0f - s_PlayerHeight)
 		);
 }
