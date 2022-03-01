@@ -10,7 +10,8 @@
 
 glm::vec3 s_WorldUp(0.0f, 1.0f, 0.0f);
 constexpr float s_SensitivityModifier = 0.02f;
-constexpr float s_Gravity = -9.81f;
+constexpr float s_Gravity = -0.5f;
+constexpr float s_JumpForce = 20.0f;
 constexpr float s_TerminalVelocity = -40.0f;
 constexpr float s_PlayerHeight = 1.9f;
 const glm::vec3 s_PlayerEyeOffset(0.0f, 1.8f, 0.0f);
@@ -39,6 +40,8 @@ void PlayerCreate(Player *player, float speed, float sensitivity)
 
 	player->EnableFlight = false;
 	player->EnableNoclip = false;
+	player->Grounded = false;
+	player->JumpRequest = false;
 
 	player->HasChangedBlock = false;
 	player->HasChangedChunk = false;
@@ -53,7 +56,7 @@ void PlayerUpdate(Player *player, World *world)
 
 	if (core.input.Keys[GLFW_KEY_LEFT_CONTROL] == Down)
 	{
-		core.player.Speed = 10 * core.player.BaseSpeed;
+		core.player.Speed = 1.5f * core.player.BaseSpeed;
 	}
 	else
 	{
@@ -114,6 +117,12 @@ void PlayerGetInput(Player *player)
 			if (core.input.Keys[GLFW_KEY_LEFT_SHIFT] & Down)
 				direction -= s_WorldUp;
 		}
+		// Handles jumping
+		else
+		{
+			player->JumpRequest = core.input.Keys[GLFW_KEY_SPACE] & Down;
+		}
+
 
 		// Rotation
 		player->Yaw += core.input.DeltaX * player->Sensitivity * s_SensitivityModifier;
@@ -130,17 +139,21 @@ void PlayerUpdatePhysics(Player *player, World *world)
 	if (player->Velocity.y > s_TerminalVelocity)
 		player->Velocity.y += s_Gravity;
 
+	// Jumping
+
+	if (player->JumpRequest && player->Grounded)
+	{
+		player->Velocity.y = s_JumpForce;
+		player->JumpRequest = false;
+	}
+
 	// Apply horizontal movement
 	
 	player->Velocity.x = direction.x * player->Speed;
 	player->Velocity.z = direction.z * player->Speed;
 	if (direction.y != 0.0f) player->Velocity.y = direction.y * player->Speed;
 
-	if (!player->EnableFlight)
-	{
-		player->Velocity.y += s_Gravity;
-	}
-
+	player->Grounded = false;
 	if (!player->EnableNoclip)
 	{
 		if (player->Velocity.x > 0.0f && PlayerPosX(player))
@@ -225,7 +238,7 @@ bool PlayerPosY(Player *player, float delta)
 
 bool PlayerNegY(Player *player, float delta)
 {
-	return (
+	if (
 		WorldGetBlock(&core.world, player->Position.x - s_PlayerWidth, player->Position.y + delta, player->Position.z - s_PlayerWidth).Collider == Collider::Block
 		||
 		WorldGetBlock(&core.world, player->Position.x + s_PlayerWidth, player->Position.y + delta, player->Position.z - s_PlayerWidth).Collider == Collider::Block
@@ -233,7 +246,12 @@ bool PlayerNegY(Player *player, float delta)
 		WorldGetBlock(&core.world, player->Position.x - s_PlayerWidth, player->Position.y + delta, player->Position.z + s_PlayerWidth).Collider == Collider::Block
 		||
 		WorldGetBlock(&core.world, player->Position.x + s_PlayerWidth, player->Position.y + delta, player->Position.z + s_PlayerWidth).Collider == Collider::Block
-		);
+		)
+	{
+		player->Grounded = true;
+		return true;
+	}
+	return false;
 }
 
 bool PlayerPosX(Player *player)

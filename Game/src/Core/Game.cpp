@@ -422,7 +422,10 @@ void ImGuiRender()
 
 	ImGui::Begin("Player Info");
 	ImGui::Text("Position: (%f, %f, %f)", core.player.Position.x, core.player.Position.y, core.player.Position.z);
+	ImGui::Text("Velocity: (%f, %f, %f)", core.player.Velocity.x, core.player.Velocity.y, core.player.Velocity.z);
 	ImGui::Text("Camera: (%f, %f)", core.player.Pitch, core.player.Yaw);
+	ImGui::Text(core.player.EnableFlight ? "Flight enabled" : "Flight disabled");
+	ImGui::Text(core.player.Grounded ? "Grounded" : "Not grounded");
 	if (ImGui::Button("Reset player position"))
 	{
 		core.player.Position = default_player_position;

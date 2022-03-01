@@ -11,7 +11,7 @@ struct Player
 {
 	glm::vec3 Position, OldPosition;
 	glm::vec3 Velocity;
-	bool EnableFlight, EnableNoclip;
+	bool EnableFlight, EnableNoclip, Grounded, JumpRequest;
 
 	float Pitch, Yaw;
 	float BaseSpeed, Speed, Sensitivity;
