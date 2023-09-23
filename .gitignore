@@ -1,44 +1,6 @@
-# Profiling
 /Game/profiler
 
-# Builds
-*x64
+build
 
-# Prerequisites
-*.d
-
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-# *.lib don't ignore libs because glfw3.lib is included in the project
-
-# Executables
-*.exe
-*.out
-*.app
-
-# Visual studio
 .vs
-
-# Configuration files
-*.ini
+.vscode
