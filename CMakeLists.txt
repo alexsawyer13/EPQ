@@ -13,8 +13,6 @@ add_executable(game
     src/Core/Assets.h
     src/Core/Core.cpp
     src/Core/Core.h
-    src/Core/Game.cpp
-    src/Core/Game.h
     src/Core/Input.cpp
     src/Core/Input.h
     src/Core/Profiler.cpp
