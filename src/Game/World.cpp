@@ -45,7 +45,7 @@ void WorldDrawChunks(World *world, int width, int height)
 		{
 			//if (FrustumCheckCuboid(frustum, (chunk.X+0.5f) * CHUNK_WIDTH, (float)CHUNK_HEIGHT * 0.5f, (chunk.Z+0.5f) * CHUNK_WIDTH, (float)CHUNK_WIDTH * 0.5f, (float)CHUNK_HEIGHT * 0.5f, (float)CHUNK_WIDTH * 0.5f))
 			{
-				core.shaders["optimisedtexarray"].SetMat4("u_Model", chunk.Model);
+				CoreShaderSetMat4("optimisedtexarray", "u_Model", chunk.Model);
 				VaoDraw(&world->Chunks[iter->second].Vao);
 			}
 		}

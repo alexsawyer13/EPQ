@@ -16,6 +16,7 @@ unsigned int rectangleIndices[] = {
 };
 
 void _LoadTexture(const std::string &name, const std::string &src);
+void _LoadShader(const std::string &name, const std::string &vert, const std::string &frag);
 
 void LoadCoreData()
 {
@@ -24,16 +25,11 @@ void LoadCoreData()
 	LoadGameData();
 
 	// Load shaders
-	core.shaders["optimisedtexarray"] = Shader();
-	core.shaders["optimisedtexarray"].Create("optimisedtexarray.vert", "optimisedtexarray.frag");
-	core.shaders["cubemap"] = Shader();
-	core.shaders["cubemap"].Create("cubemap.vert", "cubemap.frag");
-	core.shaders["texture"] = Shader();
-	core.shaders["texture"].Create("texture.vert", "texture.frag");
-	core.shaders["batch"] = Shader();
-	core.shaders["batch"].Create("batch.vert", "batch.frag");
-	core.shaders["highlight"] = Shader();
-	core.shaders["highlight"].Create("highlight_shader.vert", "highlight_shader.frag");
+	_LoadShader("optimisedtexarray", "optimisedtexarray.vert", "optimisedtexarray.frag");
+	_LoadShader("cubemap", "cubemap.vert", "cubemap.frag");
+	_LoadShader("texture", "texture.vert", "cubemap.frag");
+	_LoadShader("batch", "batch.vert", "batch.frag");
+	_LoadShader("highlight", "highlight_shader.vert", "highlight_shader.frag");
 
 	// Load cubemap
 	core.vaos["cubemap"] = {};
@@ -98,6 +94,11 @@ void LoadCoreData()
 
 void FreeCoreData()
 {
+	for (auto &shader : core.shaders)
+	{
+		ShaderDestroy(&shader.second);
+	}
+
 	for (auto &iter : core.textures)
 	{
 		Texture2DDestroy(&iter.second);
@@ -125,4 +126,40 @@ void _LoadTexture(const std::string &name, const std::string &src)
 	Texture2DCreate(&core.textures[name]);
 	Image image(src, true);
 	Texture2DSetData(&core.textures[name], &image);
+}
+
+void _LoadShader(const std::string &name, const std::string &vert, const std::string &frag)
+{
+	core.shaders[name] = {};
+	ShaderCreate(&core.shaders[name], vert, frag);
+}
+
+void CoreShaderBind(const std::string &shader)
+{
+	ShaderBind(&core.shaders[shader]);
+}
+
+void CoreShaderSetMat4(const std::string &shader, const std::string &name, const glm::mat4 &mat)
+{
+	ShaderSetMat4(&core.shaders[shader], name, mat);
+}
+
+void CoreShaderSetInt(const std::string &shader, const std::string &name, int val)
+{
+	ShaderSetInt(&core.shaders[shader], name, val);
+}
+
+void CoreShaderSetUnsignedInt(const std::string &shader, const std::string &name, unsigned int val)
+{
+	ShaderSetUnsignedInt(&core.shaders[shader], name, val);
+}
+
+void CoreShaderSetFloat(const std::string &shader, const std::string &name, float val)
+{
+	ShaderSetFloat(&core.shaders[shader], name, val);
+}
+
+void CoreShaderSetFloat4(const std::string &shader, const std::string &name, const glm::vec4 &val)
+{
+	ShaderSetFloat4(&core.shaders[shader], name, val);
 }

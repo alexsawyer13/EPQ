@@ -304,10 +304,10 @@ void OpenGLRender(int width, int height)
 		PROFILE_SCOPE_US("DrawChunks");
 
 		// Draw chunks
-		core.shaders["optimisedtexarray"].Bind();
-		core.shaders["optimisedtexarray"].SetMat4("u_View", view);
-		core.shaders["optimisedtexarray"].SetMat4("u_Proj", proj);
-		core.shaders["optimisedtexarray"].SetInt("u_Texture", 0);
+		CoreShaderBind("optimisedtexarray");
+		CoreShaderSetMat4("optimisedtexarray", "u_View", view);
+		CoreShaderSetMat4("optimisedtexarray", "u_Proj", proj);
+		CoreShaderSetInt("optimisedtexarray", "u_Texture", 0);
 
 		TexArrayBind(&core.block_texarray, 0);
 
@@ -317,7 +317,7 @@ void OpenGLRender(int width, int height)
 		if (timeSinceLastAnimFrame > animDelay)
 		{
 			currentAnimFrame++;
-			core.shaders["optimisedtexarray"].SetUnsignedInt("u_CurrentAnimationFrame", currentAnimFrame);
+			CoreShaderSetUnsignedInt("optimisedtexarray", "u_CurrentAnimationFrame", currentAnimFrame);
 			lastAnimFrame = currentTime;
 		}
 
@@ -335,10 +335,10 @@ void OpenGLRender(int width, int height)
 		// Highlighted block
 		if (frame_raycast.Hit)
 		{
-			core.shaders["highlight"].Bind();
-			core.shaders["highlight"].SetMat4("u_View", view);
-			core.shaders["highlight"].SetMat4("u_Proj", proj);
-			core.shaders["highlight"].SetFloat4("u_Colour", highlight_colour);
+			CoreShaderBind("highlight");
+			CoreShaderSetMat4("highlight", "u_View", view);
+			CoreShaderSetMat4("highlight", "u_Proj", proj);
+			CoreShaderSetFloat4("highlight", "u_Colour", highlight_colour);
 
 			glm::vec3 low(0.0f);
 			glm::vec3 axis1(0.0f), axis2(0.0f);
@@ -376,8 +376,8 @@ void OpenGLRender(int width, int height)
 			VaoDraw(&core.vaos["highlight"]);
 		}
 
-		core.shaders["batch"].Bind();
-		core.shaders["batch"].SetMat4("u_Proj", ortho);
+		CoreShaderBind("batch");
+		CoreShaderSetMat4("batch", "u_Proj", ortho);
 		
 		// Crosshair
 		core.uirenderer.Quads.push_back({

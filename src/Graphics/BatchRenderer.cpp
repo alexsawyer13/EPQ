@@ -21,12 +21,12 @@ unsigned int rectangleIndices[] = {
 
 void BatchCreate(BatchRenderer *renderer)
 {
-	core.shaders["batch"].Bind();
+	CoreShaderBind("batch");
 	for (int i = 0; i < MAX_TEXTURE_UNITS; i++)
 	{
 		char buffer[256];
 		sprintf_s(buffer, "u_Samplers[%d]", i);
-		core.shaders["batch"].SetInt(buffer, i);
+		CoreShaderSetInt("batch", buffer, i);
 	}
 
 	VaoCreate(&renderer->Vao);
@@ -61,7 +61,7 @@ void BatchDestroy(BatchRenderer *renderer)
 
 void BatchRender(BatchRenderer *renderer)
 {
-	core.shaders["batch"].Bind();
+	CoreShaderBind("batch");
 
 	// Sort quads by texture
 	std::unordered_map<Texture2D *, std::vector<Quad*>> quadsByTexture;

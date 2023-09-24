@@ -6,31 +6,19 @@
 #include <string>
 #include <unordered_map>
 
-class Shader
+struct Shader
 {
-public:
-	Shader();
-	~Shader();
-
-	void Create(const std::string &vertexPath, const std::string &fragmentPath);
-	void Destroy();
-
-	void Bind();
-	static void Unbind();
-
-	void SetMat4(const std::string &name, const glm::mat4 &mat);
-	void SetInt(const std::string &name, int val);
-	void SetUnsignedInt(const std::string &name, unsigned int val);
-	void SetFloat(const std::string &name, float val);
-	void SetFloat4(const std::string &name, const glm::vec4 &val);
-
-private:
-	GLuint LoadShader(const std::string &source, GLenum type);
-	GLuint LinkProgram(GLuint vertexShader, GLuint fragmentShader);
-	void FreeShader(GLuint shader);
-
-	GLint GetUniformLocation(const std::string &name);
-
-	GLuint m_Handle;
-	std::unordered_map<std::string, GLint> m_UniformCache;
+	GLuint _Handle;
+	std::unordered_map<std::string, GLint> _UniformCache;
 };
+
+int ShaderCreate(Shader *shader, const std::string &vert, const std::string &frag);
+void ShaderDestroy(Shader *shader);
+
+void ShaderBind(Shader *shader);
+
+void ShaderSetMat4(Shader *shader, const std::string &name, const glm::mat4 &mat);
+void ShaderSetInt(Shader *shader, const std::string &name, int val);
+void ShaderSetUnsignedInt(Shader *shader, const std::string &name, unsigned int val);
+void ShaderSetFloat(Shader *shader, const std::string &name, float val);
+void ShaderSetFloat4(Shader *shader, const std::string &name, const glm::vec4 &val);

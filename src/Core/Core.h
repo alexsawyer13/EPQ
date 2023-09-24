@@ -56,3 +56,10 @@ extern Core core;
 
 void LoadCoreData();
 void FreeCoreData();
+
+void CoreShaderBind(const std::string &shader);
+void CoreShaderSetMat4(const std::string &shader, const std::string &name, const glm::mat4 &mat);
+void CoreShaderSetInt(const std::string &shader, const std::string &name, int val);
+void CoreShaderSetUnsignedInt(const std::string &shader, const std::string &name, unsigned int val);
+void CoreShaderSetFloat(const std::string &shader, const std::string &name, float val);
+void CoreShaderSetFloat4(const std::string &shader, const std::string &name, const glm::vec4 &val);

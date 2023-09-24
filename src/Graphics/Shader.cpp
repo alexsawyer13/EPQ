@@ -7,42 +7,38 @@
 #include <fstream>
 #include <sstream>
 
-Shader::Shader()
+GLuint _LoadShader(const std::string &source, GLenum type);
+GLuint _LinkProgram(GLuint vertexShader, GLuint fragmentShader);
+GLint _GetUniformLocation(const std::string &name);
+
+int ShaderCreate(Shader *shader, const std::string &vertexPath, const std::string &fragmentPath)
 {
-
-}
-
-Shader::~Shader()
-{
-	Destroy();
-}
-
-void Shader::Create(const std::string &vertexPath, const std::string &fragmentPath)
-{
-	Destroy();
-
 	std::string vertexSource = ReadAsset("shaders/" + vertexPath);
 	std::string fragmentSource = ReadAsset("shaders/" + fragmentPath);
 
-	GLuint vertexShader = LoadShader(vertexSource, GL_VERTEX_SHADER);
-	GLuint fragmentShader = LoadShader(fragmentSource, GL_FRAGMENT_SHADER);
+	GLuint vertexShader = _LoadShader(vertexSource, GL_VERTEX_SHADER);
+	if (vertexShader == 0) return false;
 
-	m_Handle = LinkProgram(vertexShader, fragmentShader);
+	GLuint fragmentShader = _LoadShader(fragmentSource, GL_FRAGMENT_SHADER);
+	if (fragmentShader == 0) return false;
 
-	FreeShader(vertexShader);
-	FreeShader(fragmentShader);
+	shader->_Handle = _LinkProgram(vertexShader, fragmentShader);
+	if (shader->_Handle == 0) return false;
+
+	glDeleteShader(vertexShader);
+	glDeleteShader(fragmentShader);
+
+	return true;
 }
 
-void Shader::Destroy()
+void ShaderDestroy(Shader *shader)
 {
-	if (m_Handle)
-	{
-		glDeleteProgram(m_Handle);
-		m_UniformCache.clear();
-	}
+	glDeleteProgram(shader->_Handle);
+	shader->_UniformCache.clear();
+	shader->_Handle = 0;
 }
 
-GLuint Shader::LoadShader(const std::string &source, GLenum type)
+GLuint _LoadShader(const std::string &source, GLenum type)
 {
 	GLuint shader = glCreateShader(type);
 
@@ -61,12 +57,15 @@ GLuint Shader::LoadShader(const std::string &source, GLenum type)
 		glGetShaderInfoLog(shader, temp, nullptr, log);
 		spdlog::critical("Failed to compile shader: \n{}\n{}", source, log);
 		delete[] log;
+
+		glDeleteShader(shader);
+		return 0;
 	}
 
 	return shader;
 }
 
-GLuint Shader::LinkProgram(GLuint vertexShader, GLuint fragmentShader)
+GLuint _LinkProgram(GLuint vertexShader, GLuint fragmentShader)
 {
 	GLuint program = glCreateProgram();
 	glAttachShader(program, vertexShader);
@@ -82,63 +81,61 @@ GLuint Shader::LinkProgram(GLuint vertexShader, GLuint fragmentShader)
 		glGetProgramInfoLog(program, temp, nullptr, log);
 		spdlog::critical("Failed to link program\n{}", log);
 		delete[] log;
+
+		glDeleteProgram(program);
+		return 0;
 	}
 
 	return program;
 }
 
-void Shader::FreeShader(GLuint shader)
+void ShaderBind(Shader *shader)
 {
-	glDeleteShader(shader);
+	glUseProgram(shader->_Handle);
 }
 
-void Shader::Bind()
-{
-	glUseProgram(m_Handle);
-}
-
-void Shader::Unbind()
+void ShaderUnbind()
 {
 	glUseProgram(0);
 }
 
-GLint Shader::GetUniformLocation(const std::string &name)
+GLint _GetUniformLocation(Shader *shader, const std::string &name)
 {
-	auto iter = m_UniformCache.find(name);
-	if (iter != m_UniformCache.end()) return iter->second;
+	auto iter = shader->_UniformCache.find(name);
+	if (iter != shader->_UniformCache.end()) return iter->second;
 
-	GLint location = glGetUniformLocation(m_Handle, name.c_str());
+	GLint location = glGetUniformLocation(shader->_Handle, name.c_str());
 	if (location == -1)
 	{
 		spdlog::error("Trying to get location of uniform that doesn't exist: {}", name);
 		return -1;
 	}
 
-	m_UniformCache[name] = location;
+	shader->_UniformCache[name] = location;
 	return location;
 }
 
-void Shader::SetMat4(const std::string &name, const glm::mat4 &mat)
+void ShaderSetMat4(Shader *shader, const std::string &name, const glm::mat4 &mat)
 {
-	glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(mat));
+	glUniformMatrix4fv(_GetUniformLocation(shader, name), 1, GL_FALSE, glm::value_ptr(mat));
 }
 
-void Shader::SetInt(const std::string &name, int val)
+void ShaderSetInt(Shader *shader, const std::string &name, int val)
 {
-	glUniform1i(GetUniformLocation(name), val);
+	glUniform1i(_GetUniformLocation(shader, name), val);
 }
 
-void Shader::SetUnsignedInt(const std::string &name, unsigned int val)
+void ShaderSetUnsignedInt(Shader *shader, const std::string &name, unsigned int val)
 {
-	glUniform1ui(GetUniformLocation(name), val);
+	glUniform1ui(_GetUniformLocation(shader, name), val);
 }
 
-void Shader::SetFloat(const std::string &name, float val)
+void ShaderSetFloat(Shader *shader, const std::string &name, float val)
 {
-	glUniform1f(GetUniformLocation(name), val);
+	glUniform1f(_GetUniformLocation(shader, name), val);
 }
 
-void Shader::SetFloat4(const std::string &name, const glm::vec4 &val)
+void ShaderSetFloat4(Shader *shader, const std::string &name, const glm::vec4 &val)
 {
-	glUniform4f(GetUniformLocation(name), val[0], val[1], val[2], val[3]);
+	glUniform4f(_GetUniformLocation(shader, name), val[0], val[1], val[2], val[3]);
 }

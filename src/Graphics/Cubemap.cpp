@@ -52,10 +52,10 @@ void Cubemap::Render(const glm::mat4 view, const glm::mat4 proj)
 
 	Bind(0);
 
-	core.shaders["cubemap"].Bind();
-	core.shaders["cubemap"].SetMat4("u_View", glm::mat4(glm::mat3(view)));
-	core.shaders["cubemap"].SetMat4("u_Proj", proj);
-	core.shaders["cubemap"].SetInt("u_Cubemap", 0);
+	CoreShaderBind("cubemap");
+	CoreShaderSetMat4("cubemap", "u_View", glm::mat4(glm::mat3(view)));
+	CoreShaderSetMat4("cubemap", "u_Proj", proj);
+	CoreShaderSetInt("cubemap", "u_Cubemap", 0);
 
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 
