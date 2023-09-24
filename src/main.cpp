@@ -8,7 +8,7 @@
 #include <Game/Player.h>
 #include <Graphics/Shader.h>
 #include <Graphics/Buffers.h>
-#include <Graphics/BatchRenderer.h>
+#include <Graphics/Renderer.h>
 #include <Graphics/Info.h>
 #include <Physics/VoxelRayCast.h>
 #include <Maths/Maths.h>

@@ -4,7 +4,7 @@
 #include <Core/Input.h>
 #include <Graphics/Texture.h>
 #include <Graphics/Shader.h>
-#include <Graphics/BatchRenderer.h>
+#include <Graphics/Renderer.h>
 #include <Game/World.h>
 #include <Game/Player.h>
 #include <Data/Blocks.h>

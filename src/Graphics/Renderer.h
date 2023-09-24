@@ -15,6 +15,13 @@ Vertex
   24 bytes per vertex
 */
 
+struct Quad
+{
+	glm::vec3 Position; // Z component for depth // Bottom left corner in pixels
+	glm::vec2 Size;
+	Texture2D *Texture;
+};
+
 constexpr size_t MAX_QUADS = 10000;
 
 constexpr size_t VERTEX_SIZE = 3 * sizeof(float) + 2 * sizeof(float) + sizeof(unsigned int);
@@ -23,13 +30,6 @@ constexpr size_t VERTEX_BUFFER_SIZE = VERTEX_SIZE * VERTEX_BUFFER_COUNT;
 
 constexpr size_t INDEX_BUFFER_COUNT = MAX_QUADS * 6;
 constexpr size_t INDEX_BUFFER_SIZE = sizeof(unsigned int) * INDEX_BUFFER_COUNT;
-
-struct Quad
-{
-	glm::vec3 Position; // Z component for depth // Bottom left corner in pixels
-	glm::vec2 Size;
-	Texture2D *Texture;
-};
 
 struct BatchRenderer
 {
@@ -42,6 +42,4 @@ struct BatchRenderer
 
 void BatchCreate(BatchRenderer *renderer);
 void BatchDestroy(BatchRenderer *renderer);
-void BatchRender(BatchRenderer *renderer);
-void BatchClear(BatchRenderer *renderer);
 void BatchFlush(BatchRenderer *renderer);

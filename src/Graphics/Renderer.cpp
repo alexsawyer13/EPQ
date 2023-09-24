@@ -1,3 +1,4 @@
+#include <Graphics/Renderer.h>
 #include <Graphics/Texture.h>
 #include <Graphics/Info.h>
 #include <Core/Core.h>
@@ -19,6 +20,7 @@ unsigned int rectangleIndices[] = {
 };
 */
 
+void _BatchRender(BatchRenderer *renderer);
 
 void BatchCreate(BatchRenderer *renderer)
 {
@@ -60,7 +62,13 @@ void BatchDestroy(BatchRenderer *renderer)
 	IboDestroy(&renderer->Ibo);
 }
 
-void BatchRender(BatchRenderer *renderer)
+void BatchFlush(BatchRenderer *renderer)
+{
+    _BatchRender(renderer);
+    renderer->Quads.clear();
+}
+
+void _BatchRender(BatchRenderer *renderer)
 {
 	CoreShaderBind("batch");
 
@@ -159,15 +167,4 @@ void BatchRender(BatchRenderer *renderer)
 			numQuads = 0;
 		}
 	}
-}
-
-void BatchClear(BatchRenderer *renderer)
-{
-	renderer->Quads.clear();
-}
-
-void BatchFlush(BatchRenderer *renderer)
-{
-	BatchRender(renderer);
-	BatchClear(renderer);
 }

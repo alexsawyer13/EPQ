@@ -34,12 +34,10 @@ add_executable(game
 
     src/Graphics/Info.cpp
     src/Graphics/Info.h
-    src/Graphics/BatchRenderer.cpp
-    src/Graphics/BatchRenderer.h
+    src/Graphics/Renderer.cpp
+    src/Graphics/Renderer.h
     src/Graphics/Buffers.cpp
     src/Graphics/Buffers.h
-    src/Graphics/DebugRender.cpp
-    src/Graphics/DebugRender.h
     src/Graphics/Shader.cpp
     src/Graphics/Shader.h
     src/Graphics/Texture.cpp
