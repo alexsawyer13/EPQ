@@ -32,12 +32,12 @@ add_executable(game
     src/Game/WorldGeneration.cpp
     src/Game/WorldGeneration.h
 
+    src/Graphics/Info.cpp
+    src/Graphics/Info.h
     src/Graphics/BatchRenderer.cpp
     src/Graphics/BatchRenderer.h
     src/Graphics/Buffers.cpp
     src/Graphics/Buffers.h
-    src/Graphics/Cubemap.cpp
-    src/Graphics/Cubemap.h
     src/Graphics/DebugRender.cpp
     src/Graphics/DebugRender.h
     src/Graphics/Shader.cpp

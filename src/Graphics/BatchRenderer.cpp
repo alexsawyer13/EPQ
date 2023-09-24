@@ -1,4 +1,5 @@
-#include <Graphics/BatchRenderer.h>
+#include <Graphics/Texture.h>
+#include <Graphics/Info.h>
 #include <Core/Core.h>
 
 #include <unordered_map>
@@ -22,7 +23,7 @@ unsigned int rectangleIndices[] = {
 void BatchCreate(BatchRenderer *renderer)
 {
 	CoreShaderBind("batch");
-	for (int i = 0; i < MAX_TEXTURE_UNITS; i++)
+	for (int i = 0; i < ginfo.MAX_TEXTURE_UNITS; i++)
 	{
 		char buffer[256];
 		sprintf_s(buffer, "u_Samplers[%d]", i);
@@ -78,8 +79,8 @@ void BatchRender(BatchRenderer *renderer)
 	// Go through each group of MAX_TEXTURE_UNITS textures and render them
 
 	size_t numTextures = quadsByTexture.size();
-	size_t numDraws = numTextures / MAX_TEXTURE_UNITS + 1; // Integer division rounds down
-	size_t remainder = numTextures - (numDraws - 1) * MAX_TEXTURE_UNITS;
+	size_t numDraws = numTextures / ginfo.MAX_TEXTURE_UNITS + 1; // Integer division rounds down
+	size_t remainder = numTextures - (numDraws - 1) * ginfo.MAX_TEXTURE_UNITS;
 
 	auto iter = quadsByTexture.begin();	
 	std::vector<float> data;
@@ -88,7 +89,7 @@ void BatchRender(BatchRenderer *renderer)
 	for (size_t i = 0; i < numDraws; i++)
 	{
 		// If this is the last draw we only need to bind remainder textures, otherwise bind MAX_TEXTURE_UNITS
-		size_t numTexturesToBind = (i == (numDraws - 1)) ? remainder : MAX_TEXTURE_UNITS;
+		size_t numTexturesToBind = (i == (numDraws - 1)) ? remainder : ginfo.MAX_TEXTURE_UNITS;
 		size_t numQuads = 0;
 
 		// Bind textures in the correct slots

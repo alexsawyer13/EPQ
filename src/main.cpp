@@ -7,9 +7,9 @@
 #include <Game/World.h>
 #include <Game/Player.h>
 #include <Graphics/Shader.h>
-#include <Graphics/Cubemap.h>
 #include <Graphics/Buffers.h>
 #include <Graphics/BatchRenderer.h>
+#include <Graphics/Info.h>
 #include <Physics/VoxelRayCast.h>
 #include <Maths/Maths.h>
 
@@ -34,11 +34,11 @@
 #include <chrono>
 #include <filesystem>
 
-void Update();
-void OpenGLRender(int width, int height);
-void ImGuiRender();
+void _Update();
+void _OpenGLRender(int width, int height);
+void _ImGuiRender();
 
-void MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam);
+void _MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam);
 
 constexpr int DEFAULT_WIDTH = 1366;
 constexpr int DEFAULT_HEIGHT = 768;
@@ -73,25 +73,25 @@ const std::string hotbar_icon[9] = {
 
 int active_hotbar_slot = 0;
 
-void main()
+int main()
 {
 	// Setup
 	{
 		SCOPE_TIMER_MS("Setup");
 
 		core.profiler.session_string = GetTimeFormatted(); // TODO: MOVE THIS
-		printf("Session string: \"%s\"\n", core.profiler.session_string.c_str());
 		std::filesystem::create_directories(s_ProjectDir + "profiler/" + core.profiler.session_string);
 		
 		// Setup spdlog
 		spdlog::info("Running spdlog version {}.{}.{}", SPDLOG_VER_MAJOR, SPDLOG_VER_MINOR, SPDLOG_VER_PATCH);
 		spdlog::set_level(spdlog::level::trace);
+		spdlog::info("Session string: \"{}\"\n", core.profiler.session_string.c_str());
 
 		// Initialise GLFW
 		if (!glfwInit())
 		{
 			spdlog::critical("Failed to initialise GLFW");
-			throw;
+			return 1;
 		}
 
 		// Create GLFW window
@@ -99,7 +99,7 @@ void main()
 		if (!core.window)
 		{
 			spdlog::critical("Failed to create GLFW window");
-			throw;
+			return 1;
 		}
 
 		glfwMakeContextCurrent(core.window);
@@ -109,12 +109,18 @@ void main()
 		if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 		{
 			spdlog::critical("Failed to load OpenGL");
-			throw;
+			return 1;
+		}
+
+		if (!GraphicsInfoLoad())
+		{
+			spdlog::critical("Failed to load graphics info");
+			return 1;
 		}
 
 		// Set GL debug callback
 		glEnable(GL_DEBUG_OUTPUT);
-		glDebugMessageCallback(MessageCallback, 0);
+		glDebugMessageCallback(_MessageCallback, 0);
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -134,7 +140,10 @@ void main()
 		// Center window
 		const GLFWvidmode *mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 		if (!mode)
-			return;
+		{
+			spdlog::critical("Failed to get GLFW video mode");
+			return 1;
+		}
 
 		int monitorX, monitorY;
 		glfwGetMonitorPos(glfwGetPrimaryMonitor(), &monitorX, &monitorY);
@@ -172,11 +181,11 @@ void main()
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
 
-		// Update function
-		Update();
+		// _Update function
+		_Update();
 
 		// OpenGL render
-		OpenGLRender(width, height);
+		_OpenGLRender(width, height);
 
 		// Render ImGUI frame
 		if (ImGui_enabled)
@@ -184,7 +193,7 @@ void main()
 			ImGui_ImplOpenGL3_NewFrame();
 			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
-			ImGuiRender();
+			_ImGuiRender();
 			ImGui::Render();
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 		}
@@ -210,7 +219,7 @@ void main()
 	glfwTerminate();
 }
 
-void Update()
+void _Update()
 {
 	PROFILE_SCOPE_US("Update");
 
@@ -288,7 +297,7 @@ void Update()
 #endif
 }
 
-void OpenGLRender(int width, int height)
+void _OpenGLRender(int width, int height)
 {
 	PROFILE_SCOPE_US("OpenGLRender");
 
@@ -298,7 +307,7 @@ void OpenGLRender(int width, int height)
 
 	// Cubemap
 	// TODO: Render after everything else with fancy depth testing
-	core.cubemap.Render(view, proj);
+	CubemapRender(&core.cubemap, view, proj);
 
 	{
 		PROFILE_SCOPE_US("DrawChunks");
@@ -411,10 +420,9 @@ void OpenGLRender(int width, int height)
 
 int frame_delay = 30;
 
-void ImGuiRender()
+void _ImGuiRender()
 {
 	PROFILE_SCOPE_US("ImGuiRender");
-
 
 	if (frameCount % frame_delay == 0)
 	{
@@ -556,7 +564,7 @@ void ImGuiRender()
 	animDelay = (int)animDelayInt;
 }
 
-void MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam)
+void _MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam)
 {
 	switch (severity)
 	{

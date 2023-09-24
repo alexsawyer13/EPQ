@@ -24,9 +24,6 @@ constexpr size_t VERTEX_BUFFER_SIZE = VERTEX_SIZE * VERTEX_BUFFER_COUNT;
 constexpr size_t INDEX_BUFFER_COUNT = MAX_QUADS * 6;
 constexpr size_t INDEX_BUFFER_SIZE = sizeof(unsigned int) * INDEX_BUFFER_COUNT;
 
-// TODO: Make this dynamic
-constexpr size_t MAX_TEXTURE_UNITS = 16; // Guaranteed to be at least 16 by OpenGL
-
 struct Quad
 {
 	glm::vec3 Position; // Z component for depth // Bottom left corner in pixels

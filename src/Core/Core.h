@@ -5,7 +5,6 @@
 #include <Graphics/Texture.h>
 #include <Graphics/Shader.h>
 #include <Graphics/BatchRenderer.h>
-#include <Graphics/Cubemap.h>
 #include <Game/World.h>
 #include <Game/Player.h>
 #include <Data/Blocks.h>
